@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=0.5">
+<meta name="viewport" id="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=5">
 <title>Programas · Tierra Linda</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Lora:ital@1&display=swap" rel="stylesheet">
 <style>
@@ -10,7 +10,10 @@
     --verde: #17452e; --verde2: #1e5a3c; --oro: #b8912f; --tinta: #22312a;
     --gris: #66756c; --linea: #dde6df; --suave: #f3f7f4;
   }
-  body { background: #e9ece9; font-family: 'Poppins', 'Segoe UI', sans-serif; }
+  body {
+    background: #e9ece9; font-family: 'Poppins', 'Segoe UI', sans-serif;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
 
   /* ---------- Barra de herramientas (no se imprime) ---------- */
   .toolbar {
@@ -90,8 +93,66 @@
   .cita p { font-family: 'Lora', Georgia, serif; font-style: italic; font-size: 10.3px; line-height: 1.42; color: var(--verde); }
   .cita .autor { font-family: 'Poppins'; font-size: 8.2px; font-style: normal; color: var(--gris); margin-top: 4px; letter-spacing: 0.6px; }
 
+  /* ---------- Vista en tarjetas para pantallas angostas ----------
+     Va dentro de @media screen, nunca se aplica al imprimir: el papel sigue
+     siendo la tabla de carta horizontal. Se activa con la clase body.tarjetas. */
+  @media screen and (max-width: 820px) {
+    body.tarjetas .hoja { width: auto; min-height: 0; margin: 8px; padding: 14px 12px; }
+    body.tarjetas header { gap: 10px; }
+    body.tarjetas header img.tl { width: 112px; }
+    body.tarjetas header img.sda { width: 46px; }
+    body.tarjetas h1 { font-size: 17px; }
+    body.tarjetas .fecha { font-size: 12.5px; }
+    body.tarjetas .meta span.mchip { font-size: 11.5px; padding: 4px 12px; }
+    body.tarjetas .regla { margin-bottom: 10px; }
+
+    body.tarjetas table, body.tarjetas tbody, body.tarjetas tr, body.tarjetas td { display: block; width: auto; }
+    body.tarjetas tr {
+      border: 1px solid var(--linea) !important; border-radius: 12px;
+      margin-bottom: 10px; padding: 9px 12px; background: #fff;
+    }
+    body.tarjetas tr.sec-first td, body.tarjetas tbody tr:last-child td { border-top: none; border-bottom: none; }
+    body.tarjetas td { border: none !important; width: auto !important; text-align: left !important; padding: 2px 0; }
+
+    /* la banda vertical se vuelve encabezado de seccion */
+    body.tarjetas .spine {
+      background: var(--verde); border-radius: 9px; padding: 7px 12px; margin: 2px 0 10px;
+    }
+    body.tarjetas .spine-wrap { flex-direction: row; justify-content: space-between; align-items: center; }
+    body.tarjetas .spine span { writing-mode: horizontal-tb; transform: none; font-size: 11.5px; letter-spacing: 2px; }
+    body.tarjetas .sbtn { width: 30px; height: 24px; font-size: 12px; }
+
+    body.tarjetas .hora { display: flex; align-items: baseline; gap: 9px; }
+    body.tarjetas .rango { font-size: 15px; }
+    body.tarjetas .mins { font-size: 12px; }
+    body.tarjetas .espacio .tit { font-size: 15.5px; margin-top: 3px; }
+    body.tarjetas .espacio .sub { font-size: 13px; }
+    body.tarjetas .dirige .nom { font-size: 14.5px; margin-top: 5px; }
+    body.tarjetas .dirige .rol { font-size: 12.5px; }
+    body.tarjetas .chip { font-size: 9.5px; padding: 2.5px 10px; }
+
+    body.tarjetas .ops { display: flex; gap: 9px; justify-content: flex-end; margin-top: 9px; }
+    body.tarjetas .ops button { width: 38px; height: 33px; font-size: 16px; margin: 0; }
+
+    body.tarjetas footer.pie { flex-direction: column; gap: 10px; }
+    body.tarjetas .recos { font-size: 12.5px; }
+    body.tarjetas .cita p { font-size: 13.5px; }
+  }
+
+  /* ---------- Pantallas angostas (celular / tablet) ---------- */
+  .aviso-toggle { display: none; }
+  @media (max-width: 900px) {
+    .toolbar { gap: 6px; padding: 8px 10px; }
+    .toolbar button { font-size: 11.5px; padding: 7px 11px; }
+    .toolbar .aviso { display: none; font-size: 10.5px; }
+    .toolbar .aviso.visible { display: block; }
+    .aviso-toggle { display: inline-block; }
+    .hoja { margin: 10px auto; }
+  }
+
   @media print {
     body { background: #fff; }
+    .hoja { zoom: 1 !important; }
     .toolbar, .ops, .sbtn, .meta .quitar, .meta .agregar { display: none !important; }
     .hoja { margin: 0; box-shadow: none; width: 11in; height: 8.5in; }
     header img:hover { outline: none; }
@@ -107,6 +168,8 @@
   <button onclick="copiarEnlace()">🔗 Copiar enlace con mi versión</button>
   <button onclick="descargarHTML()">💾 Descargar copia</button>
   <button onclick="restablecer()">↺ Restablecer ejemplo</button>
+  <button onclick="alternarVista()" title="Ver la hoja como va a quedar impresa">⤢ Ver como se imprime</button>
+  <button class="aviso-toggle" onclick="alternarAyuda()" title="Cómo se usa">❔ Ayuda</button>
   <span id="estado"></span>
   <span class="aviso">Todo es editable con un clic: títulos, etiquetas, secciones, horas y responsables. En cada fila: ↑↓ la mueven (al llegar al borde pasa a la sección vecina), ➕ agrega un espacio, 👤 pone o quita el sello, ✕ lo elimina. Las flechas de la banda verde mueven la sección completa. Clic en un logo para reemplazarlo. Los cambios se guardan solos en este navegador.</span>
 </div>
@@ -1489,12 +1552,28 @@ function guardar() {
 }
 function marcarEstado(txt) { $('#estado').textContent = txt; setTimeout(() => $('#estado').textContent = '', 2500); }
 
+/* ---------- minutos calculados ----------
+   Lee un rango tipo "9:05 - 9:20" y devuelve "15 min". Las horas de los programas
+   van en formato de 12 horas sin am/pm, asi que si el fin queda antes del inicio
+   se asume que cruzo el mediodia (11:35 - 12:20) o la tarde (12:20 - 1:05). */
+function calcularMins(rango) {
+  const p = String(rango).match(/(\d{1,2}):(\d{2})\s*(?:[–\-—]|a)\s*(\d{1,2}):(\d{2})/);
+  if (!p) return null;
+  const inicio = (+p[1] % 12) * 60 + +p[2];
+  let fin = (+p[3] % 12) * 60 + +p[4];
+  if (fin < inicio) fin += 12 * 60;
+  const total = fin - inicio;
+  if (total <= 0 || total > 12 * 60) return null;
+  return total + ' min';
+}
+
 /* ---------- render ---------- */
 function render() {
   document.querySelectorAll('[data-k]').forEach(el => {
     const k = el.dataset.k;
     if (k === 'recos') el.innerHTML = modelo[k]; else el.textContent = modelo[k];
   });
+  if (document.body) setTimeout(aplicarVista, 0);
   $('#logo-tl').src = (modelo.logos && modelo.logos.tl) || LOGO_TL;
   $('#logo-sda').src = (modelo.logos && modelo.logos.sda) || LOGO_SDA;
   $('#meta').innerHTML = modelo.meta.map((m, i) =>
@@ -1515,7 +1594,7 @@ function render() {
       }
       tr.innerHTML += `
         <td class="hora"><div class="rango" contenteditable data-f="${si}.${fi}.hora">${f.hora}</div>
-          <div class="mins" contenteditable data-f="${si}.${fi}.mins">${f.mins}</div></td>
+          <div class="mins" data-f="${si}.${fi}.mins" title="Se calcula del rango de horas">${calcularMins(f.hora) || f.mins}</div></td>
         <td class="espacio"><div class="tit" contenteditable data-f="${si}.${fi}.tit">${f.tit}</div>
           <div class="sub" contenteditable data-f="${si}.${fi}.sub">${f.sub}</div></td>
         <td class="dirige"><div class="nom" contenteditable data-f="${si}.${fi}.nom">${f.nom}</div>
@@ -1639,9 +1718,52 @@ function restablecer() {
   render(); marcarEstado('Restablecido');
 }
 
+/* ---------- ajuste al ancho de la pantalla ----------
+   La hoja mide 11 pulgadas (1056 px) porque es una carta horizontal. En un celular
+   el viewport es de ~390 px, asi que sin escalar se sale por el lado derecho.
+   Se reduce con zoom para que quepa completa; el pinch sigue disponible para acercar.
+   En impresion el zoom vuelve a 1 por la regla de @media print. */
+/* ---------- dos vistas ----------
+   En pantallas de hasta 820 px el programa se dibuja como tarjetas (una por espacio),
+   que es lo editable en un celular. El boton pasa a la vista de hoja, que es la que se
+   imprime, escalada para verse completa. Al imprimir siempre manda la hoja. */
+const ANCHO_TARJETAS = 820;
+let vistaHoja = false;
+function esAngosta() { return document.documentElement.clientWidth <= ANCHO_TARJETAS; }
+function aplicarVista() {
+  const hoja = document.querySelector('.hoja');
+  const meta = document.getElementById('viewport');
+  const tarjetas = esAngosta() && !vistaHoja;
+  document.body.classList.toggle('tarjetas', tarjetas);
+  /* en tarjetas el telefono debe dibujar 1:1; en vista hoja se abre alejado
+     para que se vea la carta completa, como estaba antes */
+  if (meta) meta.setAttribute('content',
+    'width=device-width, initial-scale=' + (tarjetas ? '1' : '0.5') + ', maximum-scale=5');
+  if (tarjetas) { hoja.style.zoom = 1; return; }
+  hoja.style.zoom = 1;
+  const disponible = document.documentElement.clientWidth - 16;
+  const necesario = hoja.offsetWidth;
+  if (necesario > disponible) hoja.style.zoom = disponible / necesario;
+}
+function alternarVista() { vistaHoja = !vistaHoja; aplicarVista(); }
+function ajustarEscala() { aplicarVista(); }
+function alternarAyuda() { document.querySelector('.aviso').classList.toggle('visible'); }
+window.addEventListener('resize', ajustarEscala);
+window.addEventListener('orientationchange', ajustarEscala);
+
 /* ---------- inicio ---------- */
 modelo = cargar();
 render();
-document.addEventListener('input', e => { if (e.target.closest('[contenteditable]')) guardar(); });
+aplicarVista();
+document.addEventListener('input', e => {
+  const campo = e.target.closest('[contenteditable]');
+  if (!campo) return;
+  if (campo.classList.contains('rango')) {
+    const mins = campo.parentElement.querySelector('.mins');
+    const calculado = calcularMins(campo.textContent);
+    if (mins && calculado) mins.textContent = calculado;
+  }
+  guardar();
+});
 </script>
 </body></html>
