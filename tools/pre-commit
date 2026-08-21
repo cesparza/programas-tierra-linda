@@ -1,0 +1,37 @@
+#!/bin/sh
+# Guardia de lineas largas.
+#
+# Por que existe: los visores de diff (SmartGit entre otros) no cargan el contenido de un
+# archivo que tenga alguna linea de mas de 10.000 caracteres, y muestran solo el tamano y el
+# SHA. Eso pasa cuando se embebe algo grande en una sola linea: una imagen en base64, un JSON
+# minificado, un bundle. El limite de abajo es mas estricto a proposito, para avisar antes de
+# llegar al punto donde el diff se rompe.
+#
+# Como activarlo (una sola vez por copia del repositorio):
+#   git config core.hooksPath tools
+#
+# Para saltarlo en un commit puntual:
+#   git commit --no-verify
+
+LIMITE=2000
+falla=0
+
+for archivo in $(git diff --cached --name-only --diff-filter=ACM); do
+  case "$archivo" in
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.pdf|*.zip|*.ico|*.woff|*.woff2|*.ttf|*.otf|*.mp3|*.mp4) continue ;;
+  esac
+  [ -f "$archivo" ] || continue
+  largo=$(awk '{ if (length($0) > m) m = length($0) } END { print m + 0 }' "$archivo")
+  if [ "$largo" -gt "$LIMITE" ]; then
+    echo "  $archivo -> linea de $largo caracteres (limite $LIMITE)"
+    falla=1
+  fi
+done
+
+if [ "$falla" -eq 1 ]; then
+  echo ""
+  echo "Commit detenido: hay lineas muy largas y el diff no se va a poder ver."
+  echo "Parte el contenido en lineas cortas, o saca el archivo grande aparte."
+  echo "Si de verdad lo necesitas asi: git commit --no-verify"
+  exit 1
+fi

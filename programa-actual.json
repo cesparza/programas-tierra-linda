@@ -1,0 +1,176 @@
+{
+  "kicker": "Iglesia Adventista del Séptimo Día",
+  "titulo": "Programación del Servicio · Tierra Linda",
+  "fecha": "Sábado 22 de agosto de 2026",
+  "meta": [
+    [
+      "Lideran:",
+      "Ministerio Infantil y Ministerio de la Mujer"
+    ],
+    [
+      "Temática:",
+      "Prevención del abuso infantil y de la mujer"
+    ],
+    [
+      "Anciano de turno:",
+      "Andrés Torres"
+    ]
+  ],
+  "secciones": [
+    {
+      "nombre": "APERTURA",
+      "filas": [
+        {
+          "hora": "9:00 – 9:05",
+          "mins": "5 min",
+          "tit": "Oración inicial y bienvenida",
+          "sub": "",
+          "nom": "Andrés Torres",
+          "rol": "",
+          "chip": true,
+          "chipText": "Anciano de turno"
+        }
+      ]
+    },
+    {
+      "nombre": "ESCUELA SABÁTICA",
+      "filas": [
+        {
+          "hora": "9:05 – 9:20",
+          "mins": "15 min",
+          "tit": "Momento de alabanza",
+          "sub": "Veré a Jesús · En Jesucristo · Por tu gracia y amor · Nunca te rindas",
+          "nom": "Jasmin Cordero",
+          "rol": "Ministerio Musical",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "9:20 – 9:30",
+          "mins": "10 min",
+          "tit": "Promoción y prevención del abuso infantil",
+          "sub": "",
+          "nom": "Ángela Sánchez",
+          "rol": "",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "9:30 – 10:30",
+          "mins": "60 min",
+          "tit": "Tema: Sanado por dentro para vivir afuera",
+          "sub": "",
+          "nom": "Martha Blanco Suárez",
+          "rol": "Psicóloga clínica",
+          "chip": false,
+          "chipText": ""
+        }
+      ]
+    },
+    {
+      "nombre": "INTERMEDIO",
+      "filas": [
+        {
+          "hora": "10:30 – 10:35",
+          "mins": "5 min",
+          "tit": "Saludo oficial y anuncios",
+          "sub": "",
+          "nom": "Andrés Torres",
+          "rol": "",
+          "chip": true,
+          "chipText": "Anciano de turno"
+        },
+        {
+          "hora": "10:35 – 10:40",
+          "mins": "5 min",
+          "tit": "Presentación del bautismo (Cachipay) y voto de aceptación de fe",
+          "sub": "Nicol y Melany",
+          "nom": "Pr. Carlos Suárez",
+          "rol": "",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "10:40 – 10:55",
+          "mins": "15 min",
+          "tit": "Momento Infantil",
+          "sub": "",
+          "nom": "Angie Ayala y Ángela Murcia",
+          "rol": "",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "10:55 – 11:10",
+          "mins": "15 min",
+          "tit": "Momento de oración",
+          "sub": "Video: Ora sin cesar",
+          "nom": "Ángela Sánchez",
+          "rol": "",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "11:10 – 11:15",
+          "mins": "5 min",
+          "tit": "Diezmos y ofrendas",
+          "sub": "Himno #282 · Brilla Jesús",
+          "nom": "Andrés Torres",
+          "rol": "",
+          "chip": true,
+          "chipText": "Anciano de turno"
+        },
+        {
+          "hora": "11:15 – 11:30",
+          "mins": "15 min",
+          "tit": "Momento de alabanza · niños",
+          "sub": "Fe en fuego + El cielo te espera · Ora sin cesar · Shabat Rest",
+          "nom": "Dirige: Angie Ayala",
+          "rol": "Cantan: Josué, Daniel, Alaia, Ana Lucía, Camila, Charlott",
+          "chip": false,
+          "chipText": ""
+        }
+      ]
+    },
+    {
+      "nombre": "CULTO DIVINO",
+      "filas": [
+        {
+          "hora": "11:30 – 11:35",
+          "mins": "5 min",
+          "tit": "Doxología · Sea Exaltado",
+          "sub": "",
+          "nom": "Angie Ayala",
+          "rol": "",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "11:35 – 12:20",
+          "mins": "45 min",
+          "tit": "Predicación",
+          "sub": "",
+          "nom": "Silvia Lozano",
+          "rol": "Dir. Ministerio de la Mujer · Asociación del Alto Magdalena",
+          "chip": false,
+          "chipText": ""
+        },
+        {
+          "hora": "12:20 – 12:25",
+          "mins": "5 min",
+          "tit": "Oración final y despedida",
+          "sub": "",
+          "nom": "Andrés Torres",
+          "rol": "",
+          "chip": true,
+          "chipText": "Anciano de turno"
+        }
+      ]
+    }
+  ],
+  "recosTitulo": "Recomendaciones",
+  "recos": "<b>1.</b> Ajustémonos al horario establecido y cumplámoslo con amor; por ningún motivo habrá cambios que no estén planeados con anticipación. <b>2.</b> Quienes suben a plataforma: vestuario formal, no joyas, no tennis. <b>3.</b> A los responsables de cada ministerio, recomendar el buen uso del tiempo asignado. <b>4.</b> Anuncios: a Comunicaciones (Joana Salazar) hasta el viernes 4:00 pm, imágenes en 16:9. <b>5.</b> En la tarde: Feria de Talento Infantil, a cargo del Ministerio Infantil. Que todo lo que hagamos sea para la honra y gloria de nuestro Dios.",
+  "cita": "“Dios es un Dios de orden. Todo lo que se relaciona con el cielo está en perfecto orden; la sujeción y perfecta disciplina distinguen los movimientos de la hueste angélica. El éxito solo puede acompañar al orden y a la acción armoniosa.”",
+  "autor": "Elena G. de White · Patriarcas y Profetas, p. 391",
+  "v": 1
+}
