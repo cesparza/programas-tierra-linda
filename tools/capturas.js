@@ -8,6 +8,17 @@ const path = require('path');
 const BASE = process.env.BASE || 'http://localhost:8787/index.html';
 const SALIDA = path.resolve(__dirname, '../capturas');
 
+/* Recorta un ancho fijo a partir de un elemento, para incluir columnas vecinas. */
+async function recortarAncho(pagina, selector, nombre, ancho, margen = 10) {
+  const caja = await pagina.locator(selector).first().boundingBox();
+  if (!caja) throw new Error('no se encontró ' + selector);
+  await pagina.screenshot({
+    path: require('path').join(SALIDA, nombre),
+    clip: { x: Math.max(0, caja.x - margen), y: Math.max(0, caja.y - margen), width: ancho, height: caja.height + margen * 2 },
+  });
+  console.log('  ' + nombre);
+}
+
 /* Recorta alrededor de un elemento, con margen, para que la imagen tenga contexto. */
 async function recortar(pagina, selector, nombre, margen = 14) {
   const caja = await pagina.locator(selector).first().boundingBox();
@@ -39,8 +50,8 @@ async function recortar(pagina, selector, nombre, margen = 14) {
 
   await recortar(p, '.hoja', '01-general.png', 6);
   await recortar(p, 'header', '07-encabezado.png');
-  await recortar(p, 'tbody tr:nth-child(2) .hora', '05-minutos.png', 10);
-  await recortar(p, 'tbody tr:nth-child(2) .spine', '04-secciones.png', 10);
+  await recortarAncho(p, 'tbody tr:nth-child(2) .hora', '05-minutos.png', 560);
+  await recortarAncho(p, 'tbody tr:nth-child(2) .spine', '04-secciones.png', 620);
   await recortar(p, 'tbody tr:nth-child(2) .ops', '03-botones.png', 10);
 
   // campo con el cursor puesto, para mostrar cómo se ve al editar

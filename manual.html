@@ -49,15 +49,14 @@
   code { background: var(--suave); border: 1px solid var(--linea); border-radius: 5px;
     padding: 1px 6px; font-size: 13px; }
   figure { margin: 12px 0 16px; }
+  /* Cada imagen trae su ancho real en el atributo width (la mitad de sus pixeles, porque
+     se capturan al doble para que se vean nitidas). El CSS solo evita que se desborden y
+     nunca las agranda, que era lo que las dejaba pixeladas. */
   figure img {
     display: block; max-width: 100%; height: auto;
     border: 1px solid var(--linea); border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,.07); background: #fff;
   }
-  /* min() para que en un celular manden los 100% y no el ancho fijo */
-  figure img.chico { width: min(300px, 100%); }
-  figure img.medio { width: min(480px, 100%); }
-  figure img.telefono { width: min(290px, 100%); }
   figcaption {
     font-size: 12.5px; color: var(--gris); margin-top: 6px; padding-left: 2px;
     border-left: 2px solid var(--oro); padding-left: 9px;
@@ -70,8 +69,9 @@
     <img src="logo-tl.png" alt="Tierra Linda">
     <div class="kicker">Iglesia Adventista del Séptimo Día</div>
     <h1>Manual del programa del servicio</h1>
-    <p class="lead">Cómo armar, imprimir y compartir el programa. Sirve para el culto del sábado,
-    Sociedad de Jóvenes, vísperas o cualquier otro programa.</p>
+    <p class="lead">Cómo armar, imprimir y compartir el programa. Viene listo para el
+    <b>culto del sábado en la mañana</b>, y sirve igual para el programa de la tarde, la
+    Sociedad de Jóvenes, el culto del miércoles o el del viernes en la noche.</p>
   </header>
 
   <h2>1. Lo primero que hay que saber</h2>
@@ -86,12 +86,12 @@
   <p>La primera vez que entra, lo que ve es el <b>programa publicado</b>: el que el encargado dejó
   como oficial. Desde el momento en que usted edita algo, esa copia es suya y ya nadie la cambia.</p>
 
-  <figure><img src="capturas/01-general.png" alt="La página completa: es el mismo formato que se imprime."><figcaption>La página completa: es el mismo formato que se imprime.</figcaption></figure>
+  <figure><img src="capturas/01-general.png" alt="La página completa: es el mismo formato que se imprime." width="620" height="528"><figcaption>La página completa: es el mismo formato que se imprime.</figcaption></figure>
   <h2>2. Editar los textos</h2>
   <p>Toque o haga clic sobre <b>cualquier texto</b> y escriba encima: el título, la fecha, las horas,
   el nombre del espacio, el responsable y su cargo. Donde dice <i>detalle (opcional)</i> en gris puede
   poner los himnos, el video o cualquier nota; si lo deja vacío no aparece en el papel.</p>
-  <figure><img src="capturas/02-editar.png" alt="Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima." class="medio"><figcaption>Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima.</figcaption></figure>
+  <figure><img src="capturas/02-editar.png" alt="Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima." width="434" height="81"><figcaption>Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima.</figcaption></figure>
   <p>Si copia y pega desde Word o WhatsApp, entra solo el texto: no se cuelan otras letras ni otros
   tamaños que dañen el formato del programa.</p>
 
@@ -103,18 +103,18 @@
     <tr><td>👤</td><td>Pone o quita el sello dorado, por ejemplo <b>Anciano de turno</b>. El texto del sello también se edita.</td></tr>
     <tr><td>✕</td><td>Quita ese espacio. Si era el único de la sección, la sección desaparece.</td></tr>
   </table>
-  <figure><img src="capturas/03-botones.png" alt="Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar." class="chico"><figcaption>Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar.</figcaption></figure>
+  <figure><img src="capturas/03-botones.png" alt="Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar." width="182" height="78"><figcaption>Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar.</figcaption></figure>
   <p>Al mover un espacio el cursor se queda donde estaba y la fila sigue a la vista, así no hay que
   buscarla otra vez ni se cierra el teclado del celular.</p>
 
   <h2>4. Las secciones</h2>
-  <figure><img src="capturas/04-secciones.png" alt="La banda verde de la sección, con sus flechas para moverla completa." class="chico"><figcaption>La banda verde de la sección, con sus flechas para moverla completa.</figcaption></figure>
+  <figure><img src="capturas/04-secciones.png" alt="La banda verde de la sección, con sus flechas para moverla completa." width="620" height="195"><figcaption>La banda verde de la sección, con sus flechas para moverla completa.</figcaption></figure>
   <p>Son las bandas verdes: Apertura, Escuela Sabática, Intermedio, Culto Divino. El nombre se edita
   igual que todo lo demás, las flechas de la banda mueven la sección completa con sus espacios, y con
   <span class="btn claro">➕ Sección</span> agrega una nueva al final.</p>
 
   <h2>5. Los minutos se calculan solos</h2>
-  <figure><img src="capturas/05-minutos.png" alt="Se escribe el rango; los minutos de abajo se calculan solos." class="chico"><figcaption>Se escribe el rango; los minutos de abajo se calculan solos.</figcaption></figure>
+  <figure><img src="capturas/05-minutos.png" alt="Se escribe el rango; los minutos de abajo se calculan solos." width="560" height="78"><figcaption>Se escribe el rango; los minutos de abajo se calculan solos.</figcaption></figure>
   <p>Usted escribe el rango de horas y el sistema pone los minutos. No hay que sumar nada a mano.</p>
   <table>
     <tr><th>Si escribe</th><th>Aparece</th></tr>
@@ -124,12 +124,12 @@
     <tr><td>5:00 a 6:30</td><td>90 min</td></tr>
   </table>
   <p>El <b>am</b> y el <b>pm</b> son opcionales: si no los escribe, se entiende que el programa
-  no dura más de doce horas. Conviene escribirlos en los programas de la noche, como las vísperas o
-  el culto del miércoles, para que quien lea el papel no tenga duda. Si la hora queda mal escrita,
+  no dura más de doce horas. Conviene escribirlos en los programas de la noche, como el culto del
+  miércoles o el del viernes, para que quien lea el papel no tenga duda. Si la hora queda mal escrita,
   los minutos se quedan como estaban en vez de borrarse.</p>
 
   <h2>6. Si se equivoca: deshacer</h2>
-  <figure><img src="capturas/06-deshacer.png" alt="El botón de deshacer se activa en cuanto hay algo que devolver." class="chico"><figcaption>El botón de deshacer se activa en cuanto hay algo que devolver.</figcaption></figure>
+  <figure><img src="capturas/06-deshacer.png" alt="El botón de deshacer se activa en cuanto hay algo que devolver." width="122" height="54"><figcaption>El botón de deshacer se activa en cuanto hay algo que devolver.</figcaption></figure>
   <p>El botón <span class="btn claro">↶ Deshacer</span> devuelve el último cambio de estructura:
   un espacio que quitó por error, una fila que movió, un sello que puso, una sección que agregó.
   Guarda los últimos 40 cambios, así que puede tocarlo varias veces. En computador también funciona
@@ -137,28 +137,28 @@
   atajo deshace las letras, como en cualquier programa.</p>
 
   <h2>7. El encabezado</h2>
-  <figure><img src="capturas/07-encabezado.png" alt="El encabezado: logos, título, fecha y las etiquetas ovaladas."><figcaption>El encabezado: logos, título, fecha y las etiquetas ovaladas.</figcaption></figure>
+  <figure><img src="capturas/07-encabezado.png" alt="El encabezado: logos, título, fecha y las etiquetas ovaladas." width="620" height="57"><figcaption>El encabezado: logos, título, fecha y las etiquetas ovaladas.</figcaption></figure>
   <p>Las etiquetas ovaladas de arriba (quién lidera, la temática, el anciano de turno) se editan tanto
   en el nombre como en el contenido. Con <span class="btn claro">➕ etiqueta</span> agrega otra, y la
   ✕ que aparece al pasar por encima la quita. Los <b>logos</b> se cambian haciendo clic sobre ellos y
   eligiendo una imagen; el máximo es 400 KB, que para un logo sobra.</p>
 
   <h2>8. En el celular</h2>
-  <figure><img src="capturas/08-celular.png" alt="En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes." class="telefono"><figcaption>En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes.</figcaption></figure>
+  <figure><img src="capturas/08-celular.png" alt="En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes." width="310" height="528"><figcaption>En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes.</figcaption></figure>
   <p>En el teléfono el programa se muestra como <b>tarjetas</b>, una por espacio, con letra normal y
   botones grandes: así se edita cómodo con el dedo. Cuando quiera ver cómo va a quedar el papel, toque
   <span class="btn claro">⤢ Ver como se imprime</span>, y para volver a editar toque
   <span class="btn claro">📱 Vista celular</span>. El botón siempre dice a dónde lo lleva.</p>
 
   <h2>9. Imprimir o guardar el PDF</h2>
-  <figure><img src="capturas/09-papel.png" alt="Así queda en el papel: una sola hoja, sin botones ni barras."><figcaption>Así queda en el papel: una sola hoja, sin botones ni barras.</figcaption></figure>
+  <figure><img src="capturas/09-papel.png" alt="Así queda en el papel: una sola hoja, sin botones ni barras." width="500" height="386"><figcaption>Así queda en el papel: una sola hoja, sin botones ni barras.</figcaption></figure>
   <p>Toque <span class="btn oro">🖨️ Imprimir / Guardar PDF</span>. Elija <b>tamaño carta</b>,
   <b>orientación horizontal</b> y márgenes en <b>ninguno</b>. Los botones, las flechas y la barra verde
   no salen impresos: sale solo el programa, en una sola hoja. En el iPhone, en la misma ventana de
   impresión puede elegir <i>Guardar en Archivos</i> para obtener el PDF y enviarlo por WhatsApp.</p>
 
   <h2>10. Compartir, publicar y volver atrás</h2>
-  <figure><img src="capturas/10-compartir.png" alt="Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado." class="chico"><figcaption>Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado.</figcaption></figure>
+  <figure><img src="capturas/10-compartir.png" alt="Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado." width="164" height="54"><figcaption>Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado.</figcaption></figure>
   <table>
     <tr><th>Botón</th><th>Para qué</th></tr>
     <tr><td>🔗 Editable</td><td><b>Enlace editable</b>: lleva su programa adentro. Quien lo abra ve esa versión y puede seguir editándola.</td></tr>
@@ -171,7 +171,7 @@
   la publica él.</p>
 
   <h2>11. Programas de otros sábados</h2>
-  <figure><img src="capturas/11-historico.png" alt="La lista de programas anteriores, con el vigente marcado." class="medio"><figcaption>La lista de programas anteriores, con el vigente marcado.</figcaption></figure>
+  <figure><img src="capturas/11-historico.png" alt="La lista de programas anteriores, con el vigente marcado." width="436" height="121"><figcaption>La lista de programas anteriores, con el vigente marcado.</figcaption></figure>
   <p>El botón <span class="btn claro">🗂️ Programas</span> muestra la lista de los programas de
   sábados anteriores, con el vigente marcado. Al abrir uno se carga completo, así que sirve para
   reutilizar un sábado parecido en vez de armar todo otra vez. Si usted ya tenía un programa
@@ -185,8 +185,9 @@
   se comparte con el enlace cuando ya está listo.</p>
   <p><b>¿Cómo evito que alguien me cambie el programa?</b> Comparta el
   <span class="btn claro">👁️ Enlace de solo lectura</span> en vez del editable, o envíe el PDF.</p>
-  <p><b>¿Sirve para las vísperas o para Sociedad de Jóvenes?</b> Sí. Cambie el título, la fecha y los
-  nombres de las secciones, y el formato se mantiene.</p>
+  <p><b>¿Sirve para otros programas y no solo para el culto de la mañana?</b> Sí. Cambie el título,
+  la fecha y los nombres de las secciones, y el formato se mantiene igual. Se usa lo mismo para el
+  programa de la tarde, la Sociedad de Jóvenes, el culto del miércoles o el del viernes en la noche.</p>
   <p><b>Borré algo sin querer.</b> Toque <span class="btn claro">↶ Deshacer</span>. Si ya hizo muchos
   cambios y prefiere empezar limpio, use <span class="btn claro">↺ Restablecer</span> para volver al
   programa publicado.</p>

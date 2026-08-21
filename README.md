@@ -1,12 +1,14 @@
 # Programas Tierra Linda
 
 Aplicación para armar, imprimir y compartir el programa del servicio de la Iglesia
-Adventista del Séptimo Día de Tierra Linda. Sirve para el culto del sábado, Sociedad de
-Jóvenes, vísperas o cualquier otro programa.
+Adventista del Séptimo Día de Tierra Linda. Trae cargado el culto del sábado en la mañana, y
+sirve igual para el programa de la tarde, la Sociedad de Jóvenes, el culto del miércoles o el
+del viernes en la noche.
 
 - **Aplicación:** https://programas-tierra-linda.pages.dev
 - **Manual para los usuarios:** https://programas-tierra-linda.pages.dev/manual.html
 - **Modo publicación (solo yo):** https://programas-tierra-linda.pages.dev/?publicar
+- **Manual de mantenimiento (solo yo):** https://programas-tierra-linda.pages.dev/mantenimiento.html
 
 ## Quién usa esto y quién lo mantiene
 
