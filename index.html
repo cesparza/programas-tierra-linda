@@ -9,6 +9,10 @@
   :root {
     --verde: #17452e; --verde2: #1e5a3c; --oro: #b8912f; --tinta: #22312a;
     --gris: #66756c; --linea: #dde6df; --suave: #f3f7f4;
+    /* el dorado de marca mide 2,95:1 sobre blanco: sirve para lineas y para el papel,
+       no para texto en pantalla. Esta es la version legible, solo para pantalla. */
+    --oro-texto: #8a6a17;   /* 5,05:1 */
+    --gris-tenue: #6f7c73;  /* 4,37:1, para los textos de ayuda */
   }
   body {
     background: #e9ece9; font-family: 'Poppins', 'Segoe UI', sans-serif;
@@ -34,6 +38,7 @@
   }
   @media print { .toolbar .boton-manual { display: none !important; } }
   .toolbar button:hover { filter: brightness(1.06); }
+  .toolbar button:disabled { opacity: .45; cursor: default; filter: none; }
   .toolbar .aviso { font-size: 11px; color: #cfe0d5; width: 100%; text-align: center; }
   #estado { font-size: 11px; color: #ffe9b8; min-width: 130px; text-align: center; }
 
@@ -98,6 +103,69 @@
   .cita { flex: 1; border-left: 3px solid var(--oro); padding: 6px 2px 6px 14px; display: flex; flex-direction: column; justify-content: center; }
   .cita p { font-family: 'Lora', Georgia, serif; font-style: italic; font-size: 10.3px; line-height: 1.42; color: var(--verde); }
   .cita .autor { font-family: 'Poppins'; font-size: 8.2px; font-style: normal; color: var(--gris); margin-top: 4px; letter-spacing: 0.6px; }
+
+  /* ---------- Solo lectura ----------
+     Se activa con ?ver en la direccion. No es seguridad, es claridad: quien recibe el
+     enlace ve el programa como quedo, sin campos que se puedan tocar por accidente. */
+  body.solo-lectura .ops,
+  body.solo-lectura .sbtn,
+  body.solo-lectura .meta .quitar,
+  body.solo-lectura .meta .agregar,
+  body.solo-lectura .solo-edicion { display: none !important; }
+  body.solo-lectura header img { cursor: default; }
+  body.solo-lectura header img:hover { outline: none; }
+  body.solo-lectura .espacio .sub:empty::before,
+  body.solo-lectura .dirige .rol:empty::before { content: ''; }
+  /* panel del historico */
+  #panel-programas {
+    position: fixed; z-index: 60; top: 56px; left: 50%; transform: translateX(-50%);
+    width: min(420px, 92vw); max-height: 60vh; overflow-y: auto;
+    background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.28);
+    padding: 14px 16px; font-family: 'Segoe UI', sans-serif;
+  }
+  #panel-programas h3 {
+    font-family: 'Poppins'; font-weight: 500; font-size: 12px; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--verde); margin-bottom: 10px;
+  }
+  #panel-programas .cerrar { position: absolute; top: 10px; right: 12px; border: none; background: none;
+    font-size: 15px; color: var(--gris); cursor: pointer; }
+  #panel-programas ul { list-style: none; }
+  #panel-programas li { border-top: 1px solid var(--linea); }
+  #panel-programas li:first-child { border-top: none; }
+  #panel-programas button.abrir {
+    width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+    padding: 9px 4px; font-size: 13.5px; color: var(--tinta); border-radius: 8px;
+  }
+  #panel-programas button.abrir:hover { background: var(--suave); }
+  #panel-programas .detalle { display: block; font-size: 11.5px; color: var(--gris); margin-top: 2px; }
+  #panel-programas .vigente { font-family: 'Poppins'; font-size: 9px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--oro-texto); border: 1px solid var(--oro-texto);
+    border-radius: 999px; padding: 1px 7px; margin-left: 6px; }
+  #panel-programas .vacio { font-size: 13px; color: var(--gris); }
+  @media print { #panel-programas { display: none !important; } }
+
+  .sello-vista {
+    font-family: 'Poppins'; font-size: 10.5px; font-weight: 500; letter-spacing: 1px;
+    color: #ffe9b8; border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 5px 12px;
+  }
+  body:not(.solo-lectura) .sello-vista { display: none; }
+  @media print { .sello-vista { display: none !important; } }
+
+  /* ---------- Legibilidad en pantalla ----------
+     Los tamanos y colores chicos existen para que el programa quepa en una hoja carta.
+     En pantalla no hay esa restriccion, asi que aqui se agrandan y se oscurecen. Al
+     imprimir manda el bloque de arriba, con el dorado y los tamanos originales. */
+  @media screen {
+    .kicker { color: var(--oro-texto); }
+    .chip { color: var(--oro-texto); border-color: var(--oro-texto); }
+    .mins { font-size: 10.5px; color: var(--gris); }
+    .dirige .rol { font-size: 10.5px; }
+    .espacio .sub { font-size: 11px; }
+    .cita .autor { color: var(--gris); font-size: 9px; }
+    .espacio .sub:empty::before, .dirige .rol:empty::before { color: var(--gris-tenue); }
+    .toolbar .aviso { color: #dfeae2; }
+    .recos { font-size: 10.2px; }
+  }
 
   /* ---------- Vista en tarjetas para pantallas angostas ----------
      Va dentro de @media screen, nunca se aplica al imprimir: el papel sigue
@@ -170,16 +238,21 @@
 
 <div class="toolbar">
   <button class="primario" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
-  <button onclick="agregarSeccion()">➕ Sección</button>
-  <button onclick="copiarEnlace()">🔗 Copiar enlace con mi versión</button>
+  <button class="solo-edicion" onclick="agregarSeccion()">➕ Sección</button>
+  <button class="solo-edicion" onclick="copiarEnlace(false)">🔗 Enlace editable</button>
+  <button class="solo-edicion" onclick="copiarEnlaceVista()">👁️ Enlace de solo lectura</button>
   <button onclick="descargarHTML()">💾 Descargar copia</button>
-  <button onclick="restablecer()" title="Volver al programa publicado y borrar tus cambios">↺ Restablecer</button>
-  <button onclick="publicarJSON()" title="Descargar el JSON para publicarlo en el repositorio">⬇️ JSON oficial</button>
+  <button class="solo-edicion" onclick="restablecer()" title="Volver al programa publicado y borrar tus cambios">↺ Restablecer</button>
+  <button id="btn-historico" onclick="verHistorico()" title="Abrir el programa de otro sábado">🗂️ Programas</button>
+  <button class="solo-edicion" onclick="publicarJSON()" title="Descargar el JSON con el nombre de la fecha, para publicarlo en la carpeta programas/">⬇️ Publicar JSON</button>
+  <button id="btn-deshacer" class="solo-edicion" onclick="deshacer()" disabled title="Deshacer el último cambio de estructura (Ctrl+Z)">↶ Deshacer</button>
   <button id="btn-vista" onclick="alternarVista()" title="Cambiar entre la vista de celular y la hoja impresa">⤢ Ver como se imprime</button>
   <a class="boton-manual" href="manual.html" target="_blank" rel="noopener">📖 Manual</a>
   <button class="aviso-toggle" onclick="alternarAyuda()" title="Cómo se usa">❔ Ayuda</button>
+  <span class="sello-vista">👁️ Solo lectura</span>
+  <button onclick="editarCopia()" id="btn-editar" hidden>✏️ Editar una copia</button>
   <span id="estado"></span>
-  <span class="aviso">Todo es editable con un clic: títulos, etiquetas, secciones, horas y responsables. En cada fila: ↑↓ la mueven (al llegar al borde pasa a la sección vecina), ➕ agrega un espacio, 👤 pone o quita el sello, ✕ lo elimina. Las flechas de la banda verde mueven la sección completa. Clic en un logo para reemplazarlo. Los cambios se guardan solos en este navegador.</span>
+  <span class="aviso solo-edicion">Todo es editable con un clic: títulos, etiquetas, secciones, horas y responsables. En cada fila: ↑↓ la mueven (al llegar al borde pasa a la sección vecina), ➕ agrega un espacio, 👤 pone o quita el sello, ✕ lo elimina. Las flechas de la banda verde mueven la sección completa. Clic en un logo para reemplazarlo. Los cambios se guardan solos en este navegador.</span>
 </div>
 
 <div class="hoja">
@@ -414,25 +487,146 @@ function saneaHTML(html) {
 }
 const esImagenSegura = url => typeof url === 'string' && /^data:image\//.test(url);
 const CLAVE = 'programa-editable-v1';
+/* ?ver en la direccion abre el programa en modo lectura: no se edita y no se guarda
+   nada en el navegador de quien lo abre. */
+const SOLO_LECTURA = new URLSearchParams(location.search).has('ver');
+const editable = SOLO_LECTURA ? '' : 'contenteditable';
 let modelo = null;
 const $ = s => document.querySelector(s);
+
+/* ---------- historial para deshacer ----------
+   Las operaciones de estructura (agregar, mover, quitar, sello, logo, restablecer)
+   rehacen el DOM, y ahi el deshacer del navegador ya no sirve porque los nodos que
+   conocia dejaron de existir. Se guarda una foto del modelo antes de cada una. */
+const TOPE_HISTORIAL = 40;
+const historial = [];
+function anotarHistorial() {
+  leerDOM();
+  historial.push(JSON.stringify(modelo));
+  if (historial.length > TOPE_HISTORIAL) historial.shift();
+  const boton = document.getElementById('btn-deshacer');
+  if (boton) boton.disabled = false;
+}
+function deshacer() {
+  const foto = historial.pop();
+  if (!foto) { marcarEstado('No hay nada que deshacer'); return; }
+  modelo = normalizar(JSON.parse(foto));
+  render();
+  guardarYa();
+  marcarEstado('Deshecho');
+  const boton = document.getElementById('btn-deshacer');
+  if (boton) boton.disabled = historial.length === 0;
+}
+
+/* ---------- foco y posicion ----------
+   Al rehacer el DOM se pierde el campo donde estaba el cursor: en el celular eso cierra
+   el teclado y salta al inicio de la pagina. Se anota donde estaba y se devuelve. */
+let focoDeseado = null;
+/* Al tocar un boton de fila el navegador saca el foco del campo antes de que corra el
+   manejador, asi que document.activeElement ya no sirve: se recuerda el ultimo campo
+   donde estuvo el cursor. */
+let ultimoFoco = null;
+function anotarFocoDe(el) {
+  if (!el || !el.dataset) return null;
+  const atributo = ['f', 'k', 'sec', 'meta', 'metal'].find(a => el.dataset[a] !== undefined);
+  if (!atributo) return null;
+  const seleccion = window.getSelection();
+  const dentro = seleccion && seleccion.focusNode && el.contains(seleccion.focusNode);
+  return { atributo, clave: el.dataset[atributo], posicion: dentro ? seleccion.focusOffset : null };
+}
+function anotarFoco() {
+  const activo = document.activeElement;
+  if (activo && activo.isContentEditable) {
+    const punto = anotarFocoDe(activo);
+    if (punto) return punto;
+  }
+  return ultimoFoco;
+}
+['focusin', 'keyup', 'click'].forEach(evento => document.addEventListener(evento, e => {
+  const campo = e.target.closest && e.target.closest('[contenteditable]');
+  if (campo) ultimoFoco = anotarFocoDe(campo);
+}, true));
+function devolverFoco(punto) {
+  if (!punto) return null;
+  const el = document.querySelector('[data-' + punto.atributo + '="' + punto.clave + '"]');
+  if (!el) return null;
+  el.focus({ preventScroll: true });
+  try {
+    const nodo = el.firstChild;
+    if (!nodo || punto.posicion === null) return el;
+    const rango = document.createRange();
+    rango.setStart(nodo, Math.min(punto.posicion, nodo.length || 0));
+    rango.collapse(true);
+    const seleccion = window.getSelection();
+    seleccion.removeAllRanges(); seleccion.addRange(rango);
+  } catch (e) {}
+  return el;
+}
+/* cuando una fila cambia de lugar, el cursor debe seguir a la fila, no al indice */
+function moverFoco(punto, si, fi, nsi, nfi) {
+  if (!punto || punto.atributo !== 'f') return punto;
+  const partes = punto.clave.split('.');
+  if (+partes[0] === si && +partes[1] === fi) return { ...punto, clave: nsi + '.' + nfi + '.' + partes[2] };
+  return null;  /* si estaba en otra fila, los indices ya no son de fiar */
+}
+
+/* ---------- enlace comprimido ----------
+   El modelo del programa de ejemplo son 4.250 caracteres en el enlace. Comprimido con
+   deflate queda en unos 1.700, que ya cabe en un codigo QR y sobrevive a los clientes de
+   correo que cortan direcciones largas. El prefijo 'z.' marca el formato nuevo; los
+   enlaces viejos, sin prefijo, se siguen leyendo. */
+const PREFIJO_COMPRIMIDO = 'z.';
+const aBase64Url = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const deBase64Url = texto => {
+  const normal = texto.replace(/-/g, '+').replace(/_/g, '/');
+  const bruto = atob(normal + '='.repeat((4 - normal.length % 4) % 4));
+  return Uint8Array.from(bruto, c => c.charCodeAt(0));
+};
+const sePuedeComprimir = () => typeof CompressionStream === 'function' && typeof DecompressionStream === 'function';
+
+async function comprimir(texto) {
+  const flujo = new CompressionStream('deflate-raw');
+  const escritor = flujo.writable.getWriter();
+  escritor.write(new TextEncoder().encode(texto));
+  escritor.close();
+  const bytes = new Uint8Array(await new Response(flujo.readable).arrayBuffer());
+  return PREFIJO_COMPRIMIDO + aBase64Url(bytes);
+}
+async function descomprimir(hash) {
+  const flujo = new DecompressionStream('deflate-raw');
+  const escritor = flujo.writable.getWriter();
+  escritor.write(deBase64Url(hash.slice(PREFIJO_COMPRIMIDO.length)));
+  escritor.close();
+  return new TextDecoder().decode(await new Response(flujo.readable).arrayBuffer());
+}
+/* Lee el hash en los dos formatos y devuelve el modelo, o null si no hay o no se entiende. */
+async function leerHash() {
+  const hash = location.hash.slice(1);
+  if (!hash) return null;
+  try {
+    if (hash.startsWith(PREFIJO_COMPRIMIDO)) {
+      if (!sePuedeComprimir()) return null;
+      return JSON.parse(await descomprimir(hash));
+    }
+    return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(hash)))));
+  } catch (e) { console.warn('enlace ilegible', e); return null; }
+}
 
 /* ---------- estado: URL (#) > localStorage > ejemplo ---------- */
 function leerGuardado() {
   try { const g = localStorage.getItem(CLAVE); return g ? JSON.parse(g) : null; } catch (e) { return null; }
 }
-function cargar() {
-  if (location.hash.length > 1) {
-    try {
-      const compartido = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(location.hash.slice(1))))));
-      /* Si la persona ya tiene un programa propio en este navegador, abrir un enlace de
-         otro no puede reemplazarlo en silencio: se pregunta primero. */
-      const propio = leerGuardado();
-      if (!propio || confirm('Estás abriendo un programa que te compartieron.\n\n¿Reemplazar el que tienes guardado en este dispositivo?\n\nSi eliges Cancelar, se abre el tuyo y el compartido no se pierde: queda en el enlace.')) {
-        return normalizar(compartido);
-      }
-      history.replaceState(null, '', location.pathname);
-    } catch (e) { console.warn('enlace ilegible', e); }
+async function cargar() {
+  const compartido = await leerHash();
+  if (compartido && SOLO_LECTURA) return normalizar(compartido);
+  if (compartido) {
+    /* Si la persona ya tiene un programa propio en este navegador, abrir un enlace de
+       otro no puede reemplazarlo en silencio: se pregunta primero. */
+    const propio = leerGuardado();
+    if (!propio || confirm('Estás abriendo un programa que te compartieron.\n\n¿Reemplazar el que tienes guardado en este dispositivo?\n\nSi eliges Cancelar, se abre el tuyo y el compartido no se pierde: queda en el enlace.')) {
+      return normalizar(compartido);
+    }
+    history.replaceState(null, '', location.pathname);
   }
   const g = leerGuardado();
   if (g) return normalizar(g);
@@ -468,6 +662,7 @@ function normalizar(m) {
 }
 let tGuardar = null;
 function guardar() {
+  if (SOLO_LECTURA) return;
   clearTimeout(tGuardar);
   tGuardar = setTimeout(() => {
     guardarYa();
@@ -481,6 +676,7 @@ function marcarEstado(txt, fijo) {
    reintenta sin los logos para no perder el programa, que es lo que de verdad importa. */
 function guardarYa() {
   clearTimeout(tGuardar);
+  if (SOLO_LECTURA) return;   /* el visitante no guarda el programa de otro */
   leerDOM();
   try {
     localStorage.setItem(CLAVE, JSON.stringify(modelo));
@@ -530,16 +726,20 @@ function calcularMins(rango) {
 
 /* ---------- render ---------- */
 function render() {
+  const desplazamiento = window.scrollY;
+  const foco = focoDeseado || anotarFoco();
+  focoDeseado = null;
   document.querySelectorAll('[data-k]').forEach(el => {
     const k = el.dataset.k;
     if (k === 'recos') el.innerHTML = saneaHTML(modelo[k]); else el.textContent = modelo[k];
+    if (SOLO_LECTURA) el.removeAttribute('contenteditable');
   });
   if (document.body) setTimeout(aplicarVista, 0);
   const propio = modelo.logos || {};
   $('#logo-tl').src = esImagenSegura(propio.tl) ? propio.tl : LOGO_TL;
   $('#logo-sda').src = esImagenSegura(propio.sda) ? propio.sda : LOGO_SDA;
   $('#meta').innerHTML = modelo.meta.map((m, i) =>
-    `<span class="mchip"><i style="font-style:normal" contenteditable data-metal="${i}">${esc(m[0])}</i> <b contenteditable data-meta="${i}">${esc(m[1])}</b><button class="quitar" title="Quitar etiqueta" onclick="quitarMeta(${i})">✕</button></span>`
+    `<span class="mchip"><i style="font-style:normal" ${editable} data-metal="${i}">${esc(m[0])}</i> <b ${editable} data-meta="${i}">${esc(m[1])}</b><button class="quitar" title="Quitar etiqueta" onclick="quitarMeta(${i})">✕</button></span>`
   ).join('') + `<button class="agregar" onclick="agregarMeta()">➕ etiqueta</button>`;
 
   const tb = $('#cuerpo'); tb.innerHTML = '';
@@ -550,18 +750,18 @@ function render() {
         tr.className = 'sec-first';
         tr.innerHTML = `<td class="spine" rowspan="${sec.filas.length}"><div class="spine-wrap">
           <button class="sbtn" title="Subir esta sección" onclick="moverSeccion(${si},-1)">↑</button>
-          <span contenteditable data-sec="${si}">${esc(sec.nombre)}</span>
+          <span ${editable} data-sec="${si}">${esc(sec.nombre)}</span>
           <button class="sbtn" title="Bajar esta sección" onclick="moverSeccion(${si},1)">↓</button>
         </div></td>`;
       }
       tr.innerHTML += `
-        <td class="hora"><div class="rango" contenteditable data-f="${si}.${fi}.hora">${esc(f.hora)}</div>
+        <td class="hora"><div class="rango" ${editable} data-f="${si}.${fi}.hora">${esc(f.hora)}</div>
           <div class="mins" data-f="${si}.${fi}.mins" title="Se calcula del rango de horas">${esc(calcularMins(f.hora) || '')}</div></td>
-        <td class="espacio"><div class="tit" contenteditable data-f="${si}.${fi}.tit">${esc(f.tit)}</div>
-          <div class="sub" contenteditable data-f="${si}.${fi}.sub">${esc(f.sub)}</div></td>
-        <td class="dirige"><div class="nom" contenteditable data-f="${si}.${fi}.nom">${esc(f.nom)}</div>
-          ${f.chip ? `<span class="chip" contenteditable data-f="${si}.${fi}.chipText">${esc(f.chipText || 'Anciano de turno')}</span>`
-                   : `<div class="rol" contenteditable data-f="${si}.${fi}.rol">${esc(f.rol)}</div>`}</td>
+        <td class="espacio"><div class="tit" ${editable} data-f="${si}.${fi}.tit">${esc(f.tit)}</div>
+          <div class="sub" ${editable} data-f="${si}.${fi}.sub">${esc(f.sub)}</div></td>
+        <td class="dirige"><div class="nom" ${editable} data-f="${si}.${fi}.nom">${esc(f.nom)}</div>
+          ${f.chip ? `<span class="chip" ${editable} data-f="${si}.${fi}.chipText">${esc(f.chipText || 'Anciano de turno')}</span>`
+                   : `<div class="rol" ${editable} data-f="${si}.${fi}.rol">${esc(f.rol)}</div>`}</td>
         <td class="ops">
           <button title="Subir este espacio" onclick="moverFila(${si},${fi},-1)">↑</button>
           <button title="Bajar este espacio" onclick="moverFila(${si},${fi},1)">↓</button>
@@ -572,6 +772,17 @@ function render() {
       tb.appendChild(tr);
     });
   });
+  /* Sin foco que devolver se restaura el desplazamiento. Con foco, se deja la fila a la
+     vista con scrollIntoView 'nearest': en el celular el navegador arrastra la pagina al
+     poner el cursor y pelearse con el termina peor, asi que la fila que se movio queda
+     visible en vez de saltar al inicio. */
+  const devuelto = devolverFoco(foco);
+  const fijar = () => {
+    if (devuelto) devuelto.scrollIntoView({ block: 'nearest' });
+    else window.scrollTo({ top: desplazamiento });
+  };
+  fijar();
+  requestAnimationFrame(fijar);
 }
 
 /* ---------- lectura del DOM al modelo ---------- */
@@ -591,16 +802,23 @@ function leerDOM() {
 
 /* ---------- operaciones ---------- */
 const FILA_NUEVA = () => ({ hora: '00:00 – 00:00', mins: '5 min', tit: 'Nuevo espacio', sub: '', nom: 'Responsable', rol: '', chip: false, chipText: '' });
-function agregarFila(si, fi) { leerDOM(); modelo.secciones[si].filas.splice(fi + 1, 0, FILA_NUEVA()); render(); guardar(); }
+function agregarFila(si, fi) {
+  anotarHistorial();
+  modelo.secciones[si].filas.splice(fi + 1, 0, FILA_NUEVA());
+  focoDeseado = { atributo: 'f', clave: si + '.' + (fi + 1) + '.tit', posicion: 0 };
+  render(); guardar();
+}
 function quitarFila(si, fi) {
-  leerDOM();
+  anotarHistorial();
   const sec = modelo.secciones[si];
   if (sec.filas.length === 1) { if (!confirm('Esto elimina la sección completa. ¿Continuar?')) return; modelo.secciones.splice(si, 1); }
   else sec.filas.splice(fi, 1);
   render(); guardar();
 }
 function alternarChip(si, fi) {
-  leerDOM();
+  const foco = anotarFoco();
+  anotarHistorial();
+  focoDeseado = foco;
   const f = modelo.secciones[si].filas[fi];
   f.chip = !f.chip;
   if (f.chip) f.chipText = f.chipText || 'Anciano de turno';  /* el cargo se conserva */
@@ -608,32 +826,37 @@ function alternarChip(si, fi) {
 }
 /* mueve una fila dentro de su seccion; en el borde pasa a la seccion vecina */
 function moverFila(si, fi, dir) {
-  leerDOM();
+  const foco = anotarFoco();
+  anotarHistorial();
   const secs = modelo.secciones, sec = secs[si], destino = fi + dir;
   if (destino >= 0 && destino < sec.filas.length) {
     const [f] = sec.filas.splice(fi, 1);
     sec.filas.splice(destino, 0, f);
+    focoDeseado = moverFoco(foco, si, fi, si, destino);
   } else {
     const sj = si + dir;
-    if (sj < 0 || sj >= secs.length) return;
+    if (sj < 0 || sj >= secs.length) { historial.pop(); return; }
     const [f] = sec.filas.splice(fi, 1);
     if (dir < 0) secs[sj].filas.push(f); else secs[sj].filas.unshift(f);
-    if (sec.filas.length === 0) secs.splice(si, 1);
+    const nfi = dir < 0 ? secs[sj].filas.length - 1 : 0;
+    const seVacio = sec.filas.length === 0;
+    if (seVacio) secs.splice(si, 1);
+    focoDeseado = moverFoco(foco, si, fi, seVacio && sj > si ? sj - 1 : sj, nfi);
   }
   render(); guardar();
 }
 /* mueve la seccion completa, con sus filas */
 function moverSeccion(si, dir) {
-  leerDOM();
+  anotarHistorial();
   const sj = si + dir;
   if (sj < 0 || sj >= modelo.secciones.length) return;
   const [s] = modelo.secciones.splice(si, 1);
   modelo.secciones.splice(sj, 0, s);
   render(); guardar();
 }
-function agregarSeccion() { leerDOM(); modelo.secciones.push({ nombre: 'NUEVA SECCIÓN', filas: [FILA_NUEVA()] }); render(); guardar(); }
-function agregarMeta() { leerDOM(); modelo.meta.push(['Etiqueta:', 'Valor']); render(); guardar(); }
-function quitarMeta(i) { leerDOM(); modelo.meta.splice(i, 1); render(); guardar(); }
+function agregarSeccion() { anotarHistorial(); modelo.secciones.push({ nombre: 'NUEVA SECCIÓN', filas: [FILA_NUEVA()] }); render(); guardar(); }
+function agregarMeta() { anotarHistorial(); modelo.meta.push(['Etiqueta:', 'Valor']); render(); guardar(); }
+function quitarMeta(i) { anotarHistorial(); modelo.meta.splice(i, 1); render(); guardar(); }
 
 /* ---------- logos reemplazables ---------- */
 let logoDestino = null;
@@ -661,12 +884,23 @@ $('#selector-logo').onchange = e => {
 };
 
 /* ---------- compartir y utilidades ---------- */
-function copiarEnlace() {
+/* Comparte el mismo programa pero en modo lectura: quien lo abre puede imprimirlo o
+   guardarlo en PDF, no cambiarlo. */
+async function copiarEnlaceVista() { return copiarEnlace(true); }
+
+async function editarCopia() {
+  location.href = location.pathname + location.hash;
+}
+
+async function copiarEnlace(soloVista) {
   leerDOM();
   const copia = JSON.parse(JSON.stringify(modelo));
   delete copia.logos; // los logos personalizados harian el enlace demasiado largo
-  const hash = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(copia)))));
-  const url = location.origin + location.pathname + '#' + hash;
+  const texto = JSON.stringify(copia);
+  const hash = sePuedeComprimir()
+    ? await comprimir(texto)
+    : encodeURIComponent(btoa(unescape(encodeURIComponent(texto))));
+  const url = location.origin + location.pathname + (soloVista ? '?ver' : '') + '#' + hash;
   /* WhatsApp y algunos correos cortan las direcciones muy largas, y un enlace cortado
      no da error: abre el ejemplo. Mejor avisar antes de repartirlo. */
   if (url.length > 8000) {
@@ -675,7 +909,7 @@ function copiarEnlace() {
     return;
   }
   navigator.clipboard.writeText(url)
-    .then(() => marcarEstado('Enlace copiado ✓'))
+    .then(() => marcarEstado(soloVista ? 'Enlace de solo lectura copiado ✓' : 'Enlace copiado ✓'))
     .catch(() => prompt('Copia el enlace:', url));
 }
 /* Convierte un archivo del mismo sitio en data URI, para incrustarlo en la copia. */
@@ -754,7 +988,12 @@ function aplicarVista() {
     requestAnimationFrame(aplicarVista);
   }
   const boton = document.getElementById('btn-vista');
-  if (boton) boton.textContent = tarjetas ? '⤢ Ver como se imprime' : '📱 Vista celular';
+  if (boton) {
+    /* en escritorio no hay dos vistas que alternar: la hoja es la unica y ademas se
+       ajusta sola si la ventana es angosta, asi que el boton solo estorba */
+    boton.hidden = !esAngosta();
+    boton.textContent = tarjetas ? '⤢ Ver como se imprime' : '📱 Vista celular';
+  }
   if (tarjetas) { hoja.style.zoom = 1; return; }
   hoja.style.zoom = 1;
   const disponible = document.documentElement.clientWidth - 16;
@@ -776,11 +1015,21 @@ window.addEventListener('orientationchange', ajustarEscala);
    cuando la persona no trae un enlace compartido ni tiene un programa propio guardado,
    asi nunca pisa el trabajo de nadie. Si el archivo no existe, queda el ejemplo interno. */
 const OFICIAL = 'programa-actual.json';
+/* El vigente es el primero del indice; si no hay indice se usa programa-actual.json. */
 async function cargarOficial(forzar) {
   try {
-    const respuesta = await fetch(OFICIAL, { cache: 'no-store' });
-    if (!respuesta.ok) return false;
-    const datos = await respuesta.json();
+    if (!forzar && (location.hash.length > 1 || leerGuardado())) return false;
+    let datos = null;
+    const lista = await leerIndice();
+    if (lista && lista.length) {
+      const respuesta = await fetch(CARPETA + lista[0].archivo, { cache: 'no-store' });
+      if (respuesta.ok) datos = await respuesta.json();
+    }
+    if (!datos) {
+      const respaldo = await fetch(OFICIAL, { cache: 'no-store' });
+      if (!respaldo.ok) return false;
+      datos = await respaldo.json();
+    }
     if (!forzar && (location.hash.length > 1 || leerGuardado())) return false;
     modelo = normalizar(datos);
     render();
@@ -788,33 +1037,112 @@ async function cargarOficial(forzar) {
   } catch (e) { return false; }
 }
 
+/* ---------- historico ----------
+   programas/index.json lista los programas publicados, del mas reciente al mas viejo.
+   El primero de la lista es el vigente y es el que se carga al entrar. Los demas sirven
+   para abrir el de un sabado anterior y reutilizarlo. */
+const CARPETA = 'programas/';
+let indiceProgramas = null;
+async function leerIndice() {
+  if (indiceProgramas) return indiceProgramas;
+  try {
+    const respuesta = await fetch(CARPETA + 'index.json', { cache: 'no-store' });
+    if (!respuesta.ok) return null;
+    const lista = await respuesta.json();
+    indiceProgramas = Array.isArray(lista) ? lista : null;
+    return indiceProgramas;
+  } catch (e) { return null; }
+}
+async function abrirDelHistorico(archivo) {
+  try {
+    const respuesta = await fetch(CARPETA + archivo, { cache: 'no-store' });
+    if (!respuesta.ok) throw new Error('no se encontro ' + archivo);
+    const datos = await respuesta.json();
+    if (leerGuardado() && !confirm('Vas a abrir el programa de ' + (datos.fecha || archivo) +
+        '.\n\n¿Reemplazar el que tienes en este dispositivo?')) return;
+    anotarHistorial();
+    modelo = normalizar(datos);
+    render(); guardarYa();
+    cerrarPanel();
+    marcarEstado('Programa cargado');
+  } catch (e) { alert('No se pudo abrir ese programa.'); }
+}
+function cerrarPanel() { const p = document.getElementById('panel-programas'); if (p) p.remove(); }
+async function verHistorico() {
+  cerrarPanel();
+  const lista = await leerIndice();
+  const panel = document.createElement('div');
+  panel.id = 'panel-programas';
+  panel.innerHTML = '<button class="cerrar" onclick="cerrarPanel()" title="Cerrar">✕</button>' +
+    '<h3>Programas publicados</h3>' +
+    (!lista || !lista.length
+      ? '<p class="vacio">Todavía no hay programas publicados en el repositorio.</p>'
+      : '<ul>' + lista.map((p, i) =>
+          '<li><button class="abrir" onclick="abrirDelHistorico(\'' + esc(p.archivo) + '\')">' +
+          esc(p.fecha) + (i === 0 ? '<span class="vigente">vigente</span>' : '') +
+          '<span class="detalle">' + esc(p.titulo) + ' · ' + (p.espacios || 0) + ' espacios</span>' +
+          '</button></li>').join('') + '</ul>');
+  document.body.appendChild(panel);
+}
+document.addEventListener('click', e => {
+  const panel = document.getElementById('panel-programas');
+  if (panel && !panel.contains(e.target) && !e.target.closest('#btn-historico')) cerrarPanel();
+});
+
 /* Descarga el programa actual como programa-actual.json, para publicarlo en el
    repositorio con un commit y que quede como el oficial que todos ven. */
+/* "Sábado 22 de agosto de 2026" -> "2026-08-22", para que el archivo se ordene solo */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function nombreDeArchivo(fecha) {
+  const t = String(fecha || '').toLowerCase();
+  const dia = (t.match(/\b(\d{1,2})\b/) || [])[1];
+  const anio = (t.match(/\b(20\d{2})\b/) || [])[1];
+  const mes = MESES.findIndex(m => t.includes(m)) + 1;
+  if (!dia || !anio || !mes) return OFICIAL;
+  return anio + '-' + String(mes).padStart(2, '0') + '-' + String(dia).padStart(2, '0') + '.json';
+}
 async function publicarJSON() {
   leerDOM();
   const copia = JSON.parse(JSON.stringify(modelo));
   delete copia.logos;
+  const nombre = nombreDeArchivo(copia.fecha);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(copia, null, 2)], { type: 'application/json' }));
-  a.download = OFICIAL;
+  a.download = nombre;
   a.click();
-  marcarEstado('JSON descargado');
+  marcarEstado('Descargado ' + nombre);
 }
 
 /* ---------- inicio ---------- */
-try {
-  modelo = cargar();
-  render();
-  cargarOficial(false);
-} catch (e) {
-  console.error('estado ilegible, se vuelve al ejemplo', e);
-  modelo = JSON.parse(JSON.stringify(ORIGINAL));
-  try { localStorage.removeItem(CLAVE); } catch (e2) {}
-  render();
-}
+(async () => {
+  if (SOLO_LECTURA) {
+    document.body.classList.add('solo-lectura');
+    const botonEditar = document.getElementById('btn-editar');
+    if (botonEditar) botonEditar.hidden = false;
+  }
+  try {
+    modelo = await cargar();
+    render();
+    cargarOficial(false);
+  } catch (e) {
+    console.error('estado ilegible, se vuelve al ejemplo', e);
+    modelo = JSON.parse(JSON.stringify(ORIGINAL));
+    try { localStorage.removeItem(CLAVE); } catch (e2) {}
+    render();
+  }
+})();
 aplicarVista();
 /* Pegar desde Word o WhatsApp arrastra tipografias, tamanos e incluso imagenes en base64.
    Se inserta solo el texto para que el programa mantenga su formato. */
+/* Ctrl+Z o Cmd+Z deshace la estructura, salvo mientras se escribe en un campo,
+   donde el deshacer propio del navegador es el que debe actuar. */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+    const dentro = e.target.closest && e.target.closest('[contenteditable]');
+    if (!dentro) { e.preventDefault(); deshacer(); }
+  }
+});
+
 document.addEventListener('paste', e => {
   const campo = e.target.closest && e.target.closest('[contenteditable]');
   if (!campo) return;
