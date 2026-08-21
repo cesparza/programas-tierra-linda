@@ -48,6 +48,20 @@
     text-decoration: none; border-radius: 9px; padding: 11px 22px; display: inline-block; }
   code { background: var(--suave); border: 1px solid var(--linea); border-radius: 5px;
     padding: 1px 6px; font-size: 13px; }
+  figure { margin: 12px 0 16px; }
+  figure img {
+    display: block; max-width: 100%; height: auto;
+    border: 1px solid var(--linea); border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.07); background: #fff;
+  }
+  /* min() para que en un celular manden los 100% y no el ancho fijo */
+  figure img.chico { width: min(300px, 100%); }
+  figure img.medio { width: min(480px, 100%); }
+  figure img.telefono { width: min(290px, 100%); }
+  figcaption {
+    font-size: 12.5px; color: var(--gris); margin-top: 6px; padding-left: 2px;
+    border-left: 2px solid var(--oro); padding-left: 9px;
+  }
   @media (max-width: 560px) { .hoja { padding: 22px 18px 30px; } h1 { font-size: 21px; } }
 </style></head>
 <body>
@@ -66,16 +80,18 @@
   <div class="aviso">
     <b>Importante:</b> cada persona tiene su propia copia. Si dos personas abren la página, cada una
     edita la suya y no se ven entre ellas. Para pasarle su programa a otra persona use
-    <span class="btn claro">🔗 Copiar enlace con mi versión</span>. Y si alguien le comparte un enlace,
+    <span class="btn claro">🔗 Enlace editable</span>. Y si alguien le comparte un enlace,
     la página <b>le pregunta antes</b> de reemplazar el programa que usted tenga guardado.
   </div>
   <p>La primera vez que entra, lo que ve es el <b>programa publicado</b>: el que el encargado dejó
   como oficial. Desde el momento en que usted edita algo, esa copia es suya y ya nadie la cambia.</p>
 
+  <figure><img src="capturas/01-general.png" alt="La página completa: es el mismo formato que se imprime."><figcaption>La página completa: es el mismo formato que se imprime.</figcaption></figure>
   <h2>2. Editar los textos</h2>
   <p>Toque o haga clic sobre <b>cualquier texto</b> y escriba encima: el título, la fecha, las horas,
   el nombre del espacio, el responsable y su cargo. Donde dice <i>detalle (opcional)</i> en gris puede
   poner los himnos, el video o cualquier nota; si lo deja vacío no aparece en el papel.</p>
+  <figure><img src="capturas/02-editar.png" alt="Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima." class="medio"><figcaption>Al tocar un texto queda con borde dorado: ahí ya se puede escribir encima.</figcaption></figure>
   <p>Si copia y pega desde Word o WhatsApp, entra solo el texto: no se cuelan otras letras ni otros
   tamaños que dañen el formato del programa.</p>
 
@@ -87,15 +103,18 @@
     <tr><td>👤</td><td>Pone o quita el sello dorado, por ejemplo <b>Anciano de turno</b>. El texto del sello también se edita.</td></tr>
     <tr><td>✕</td><td>Quita ese espacio. Si era el único de la sección, la sección desaparece.</td></tr>
   </table>
+  <figure><img src="capturas/03-botones.png" alt="Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar." class="chico"><figcaption>Los cinco botones de cada espacio: subir, bajar, agregar, sello y borrar.</figcaption></figure>
   <p>Al mover un espacio el cursor se queda donde estaba y la fila sigue a la vista, así no hay que
   buscarla otra vez ni se cierra el teclado del celular.</p>
 
   <h2>4. Las secciones</h2>
+  <figure><img src="capturas/04-secciones.png" alt="La banda verde de la sección, con sus flechas para moverla completa." class="chico"><figcaption>La banda verde de la sección, con sus flechas para moverla completa.</figcaption></figure>
   <p>Son las bandas verdes: Apertura, Escuela Sabática, Intermedio, Culto Divino. El nombre se edita
   igual que todo lo demás, las flechas de la banda mueven la sección completa con sus espacios, y con
   <span class="btn claro">➕ Sección</span> agrega una nueva al final.</p>
 
   <h2>5. Los minutos se calculan solos</h2>
+  <figure><img src="capturas/05-minutos.png" alt="Se escribe el rango; los minutos de abajo se calculan solos." class="chico"><figcaption>Se escribe el rango; los minutos de abajo se calculan solos.</figcaption></figure>
   <p>Usted escribe el rango de horas y el sistema pone los minutos. No hay que sumar nada a mano.</p>
   <table>
     <tr><th>Si escribe</th><th>Aparece</th></tr>
@@ -110,6 +129,7 @@
   los minutos se quedan como estaban en vez de borrarse.</p>
 
   <h2>6. Si se equivoca: deshacer</h2>
+  <figure><img src="capturas/06-deshacer.png" alt="El botón de deshacer se activa en cuanto hay algo que devolver." class="chico"><figcaption>El botón de deshacer se activa en cuanto hay algo que devolver.</figcaption></figure>
   <p>El botón <span class="btn claro">↶ Deshacer</span> devuelve el último cambio de estructura:
   un espacio que quitó por error, una fila que movió, un sello que puso, una sección que agregó.
   Guarda los últimos 40 cambios, así que puede tocarlo varias veces. En computador también funciona
@@ -117,24 +137,28 @@
   atajo deshace las letras, como en cualquier programa.</p>
 
   <h2>7. El encabezado</h2>
+  <figure><img src="capturas/07-encabezado.png" alt="El encabezado: logos, título, fecha y las etiquetas ovaladas."><figcaption>El encabezado: logos, título, fecha y las etiquetas ovaladas.</figcaption></figure>
   <p>Las etiquetas ovaladas de arriba (quién lidera, la temática, el anciano de turno) se editan tanto
   en el nombre como en el contenido. Con <span class="btn claro">➕ etiqueta</span> agrega otra, y la
   ✕ que aparece al pasar por encima la quita. Los <b>logos</b> se cambian haciendo clic sobre ellos y
   eligiendo una imagen; el máximo es 400 KB, que para un logo sobra.</p>
 
   <h2>8. En el celular</h2>
+  <figure><img src="capturas/08-celular.png" alt="En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes." class="telefono"><figcaption>En el teléfono cada espacio es una tarjeta, con letra normal y botones grandes.</figcaption></figure>
   <p>En el teléfono el programa se muestra como <b>tarjetas</b>, una por espacio, con letra normal y
   botones grandes: así se edita cómodo con el dedo. Cuando quiera ver cómo va a quedar el papel, toque
   <span class="btn claro">⤢ Ver como se imprime</span>, y para volver a editar toque
   <span class="btn claro">📱 Vista celular</span>. El botón siempre dice a dónde lo lleva.</p>
 
   <h2>9. Imprimir o guardar el PDF</h2>
+  <figure><img src="capturas/09-papel.png" alt="Así queda en el papel: una sola hoja, sin botones ni barras."><figcaption>Así queda en el papel: una sola hoja, sin botones ni barras.</figcaption></figure>
   <p>Toque <span class="btn oro">🖨️ Imprimir / Guardar PDF</span>. Elija <b>tamaño carta</b>,
   <b>orientación horizontal</b> y márgenes en <b>ninguno</b>. Los botones, las flechas y la barra verde
   no salen impresos: sale solo el programa, en una sola hoja. En el iPhone, en la misma ventana de
   impresión puede elegir <i>Guardar en Archivos</i> para obtener el PDF y enviarlo por WhatsApp.</p>
 
   <h2>10. Compartir, publicar y volver atrás</h2>
+  <figure><img src="capturas/10-compartir.png" alt="Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado." class="chico"><figcaption>Los dos enlaces: uno para trabajar entre varios, otro para repartir cerrado.</figcaption></figure>
   <table>
     <tr><th>Botón</th><th>Para qué</th></tr>
     <tr><td>🔗 Editable</td><td><b>Enlace editable</b>: lleva su programa adentro. Quien lo abra ve esa versión y puede seguir editándola.</td></tr>
@@ -147,6 +171,7 @@
   la publica él.</p>
 
   <h2>11. Programas de otros sábados</h2>
+  <figure><img src="capturas/11-historico.png" alt="La lista de programas anteriores, con el vigente marcado." class="medio"><figcaption>La lista de programas anteriores, con el vigente marcado.</figcaption></figure>
   <p>El botón <span class="btn claro">🗂️ Programas</span> muestra la lista de los programas de
   sábados anteriores, con el vigente marcado. Al abrir uno se carga completo, así que sirve para
   reutilizar un sábado parecido en vez de armar todo otra vez. Si usted ya tenía un programa

@@ -39,6 +39,10 @@ de datos. `index.html` es la fuente: se edita a mano. No existe ningún generado
 | `tests/modelo.js` | Serialización, estados dañados y filtrado de HTML. |
 | `tests/vistas.js` | Tarjetas y hoja en cuatro pantallas, más impresión. Necesita servidor local. |
 | `tools/indexar.js` | Regenera `programas/index.json`. |
+| `tools/capturas.js` | Vuelve a tomar las imágenes del manual desde la aplicación real. |
+| `tools/optimizar-capturas.py` | Reduce el peso de esas imágenes. |
+| `capturas/` | Las 11 imágenes que ilustran el manual. |
+| `mantenimiento.html` | Mi manual: versiones, publicación, casos especiales y guion de la demo. Enlazado solo en `?publicar`. |
 | `tools/pre-commit` | Bloquea líneas de más de 2.000 caracteres. |
 
 ## Publicar el programa de la semana
@@ -141,6 +145,17 @@ Guardia de líneas largas, una vez por copia del repositorio:
 ```bash
 chmod +x tools/pre-commit
 git config core.hooksPath tools
+```
+
+## Regenerar las imágenes del manual
+
+El manual se ilustra con capturas de la aplicación real, no con maquetas, así que si cambia
+la interfaz hay que volver a tomarlas:
+
+```bash
+python3 -m http.server 8787        # en otra terminal, desde la raíz
+node tools/capturas.js
+python3 tools/optimizar-capturas.py
 ```
 
 ## Despliegue

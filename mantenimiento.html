@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mantenimiento · Programas Tierra Linda</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&family=Lora:ital@1&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --verde: #17452e; --verde2: #1e5a3c; --oro: #b8912f; --oro-texto: #8a6a17;
+    --tinta: #22312a; --gris: #66756c; --linea: #dde6df; --suave: #f3f7f4;
+  }
+  body {
+    background: #eef1ee; color: var(--tinta); -webkit-text-size-adjust: 100%;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; line-height: 1.55;
+    padding: 20px 14px 70px;
+  }
+  .hoja { max-width: 860px; margin: 0 auto; background: #fff; border-radius: 14px;
+    box-shadow: 0 6px 26px rgba(0,0,0,.10); padding: 30px 36px 40px; }
+  header { border-bottom: 2px solid var(--oro); padding-bottom: 16px; margin-bottom: 8px; }
+  .kicker { font-family: 'Poppins'; font-weight: 500; font-size: 9px; letter-spacing: 3px;
+    color: var(--oro-texto); text-transform: uppercase; }
+  h1 { font-family: 'Poppins'; font-weight: 500; font-size: 26px; color: var(--verde); margin: 4px 0 6px; }
+  .lead { font-size: 14.5px; color: var(--gris); }
+  h2 { font-family: 'Poppins'; font-weight: 600; font-size: 16px; color: var(--verde);
+    margin: 30px 0 10px; padding-left: 11px; border-left: 4px solid var(--oro); }
+  h3 { font-family: 'Poppins'; font-weight: 500; font-size: 13.5px; color: var(--verde2); margin: 18px 0 6px; }
+  p, li, td, th { font-size: 14.5px; }
+  p { margin-bottom: 9px; }
+  ul, ol { margin: 6px 0 12px 22px; }
+  li { margin-bottom: 6px; }
+  b, strong { color: var(--verde2); }
+  code { background: var(--suave); border: 1px solid var(--linea); border-radius: 5px;
+    padding: 1px 6px; font-size: 13px; font-family: 'SF Mono', Menlo, monospace; }
+  pre { background: #12261c; color: #dbe9e0; border-radius: 10px; padding: 14px 16px;
+    overflow-x: auto; margin: 10px 0 14px; font-size: 13px; line-height: 1.6;
+    font-family: 'SF Mono', Menlo, monospace; }
+  pre .c { color: #86a695; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+  th { font-family: 'Poppins'; font-weight: 500; font-size: 11.5px; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--verde); background: var(--suave); }
+  .btn { display: inline-block; font-family: 'Poppins'; font-size: 12px; font-weight: 500;
+    background: var(--verde); color: #fff; border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+  .btn.claro { background: var(--suave); color: var(--verde); border: 1px solid var(--linea); }
+  .aviso { background: #fdf7e6; border: 1px solid #ecd9a5; border-radius: 10px;
+    padding: 12px 15px; margin: 14px 0; font-size: 14px; }
+  .aviso b { color: #8a6a17; }
+  .regla { background: var(--suave); border-left: 4px solid var(--verde2); border-radius: 0 8px 8px 0;
+    padding: 11px 15px; margin: 14px 0; font-family: 'Lora', Georgia, serif; font-style: italic;
+    font-size: 15px; color: var(--verde); }
+  .paso { display: flex; gap: 13px; margin-bottom: 14px; }
+  .num { flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--verde); color: #fff;
+    font-family: 'Poppins'; font-size: 12.5px; display: flex; align-items: center; justify-content: center; }
+  .paso div p:last-child { margin-bottom: 0; }
+  .quien { font-family: 'Poppins'; font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--oro-texto); border: 1px solid var(--oro-texto); border-radius: 999px;
+    padding: 1px 8px; margin-left: 6px; }
+  .indice { background: var(--suave); border-radius: 10px; padding: 14px 18px; margin: 18px 0 6px; }
+  .indice a { color: var(--verde2); text-decoration: none; font-size: 14px; }
+  .indice a:hover { text-decoration: underline; }
+  .indice li { margin-bottom: 4px; }
+  @media (max-width: 620px) { .hoja { padding: 22px 18px 30px; } h1 { font-size: 21px; } }
+</style></head>
+<body>
+<div class="hoja">
+  <header>
+    <div class="kicker">Solo para el mantenedor · Camilo</div>
+    <h1>Manual de mantenimiento</h1>
+    <p class="lead">Cómo funcionan las versiones, cómo publicar cada semana, qué mostrar en la demo
+    y qué pedirle a quien está de turno.</p>
+  </header>
+
+  <div class="indice">
+    <ul style="list-style:none;margin-left:0">
+      <li><a href="#versiones">1. Las tres versiones que existen</a></li>
+      <li><a href="#semana">2. El flujo de una semana</a></li>
+      <li><a href="#publicar">3. Publicar, paso a paso</a></li>
+      <li><a href="#casos">4. Casos especiales</a></li>
+      <li><a href="#demo">5. Guion de la demo, 6 minutos</a></li>
+      <li><a href="#andres">6. Qué pedirle a Andrés esta vez</a></li>
+      <li><a href="#checklist">7. Rutina semanal en una tarjeta</a></li>
+    </ul>
+  </div>
+
+  <h2 id="versiones">1. Las tres versiones que existen</h2>
+  <p>Casi todos los enredos que puedan pasar salen de confundir estas tres cosas. Son distintas
+  y viven en lugares distintos.</p>
+  <table>
+    <tr><th>Versión</th><th>Dónde vive</th><th>Quién la ve</th><th>Se actualiza</th></tr>
+    <tr>
+      <td><b>La copia de cada persona</b></td>
+      <td>En el teléfono o computador de quien edita</td>
+      <td>Solo esa persona, en ese equipo</td>
+      <td>Sola, con cada tecla</td>
+    </tr>
+    <tr>
+      <td><b>El enlace</b> (editable o de solo lectura)</td>
+      <td>Dentro de la dirección, comprimido</td>
+      <td>Quien reciba el enlace</td>
+      <td><b>Nunca.</b> Es una foto del momento en que se copió</td>
+    </tr>
+    <tr>
+      <td><b>El programa publicado</b></td>
+      <td><code>programas/AAAA-MM-DD.json</code> en el repositorio</td>
+      <td>Todos los que entren a la página sin enlace y sin copia propia</td>
+      <td>Cuando yo hago commit y push</td>
+    </tr>
+  </table>
+  <div class="regla">El enlace es una foto. Lo publicado es el original.</div>
+  <p>Consecuencia práctica: si Andrés me manda su enlace y después sigue corrigiendo, <b>su enlace
+  no cambia</b>. Tiene que mandarme uno nuevo, o yo publico y quedamos sobre lo publicado.</p>
+
+  <h2 id="semana">2. El flujo de una semana</h2>
+  <div class="paso"><div class="num">1</div><div>
+    <p><b>Jueves o viernes: el de turno arma el programa</b><span class="quien">autor</span></p>
+    <p>Abre <code>programas-tierra-linda.pages.dev</code>. Le sale el programa publicado del sábado
+    anterior, edita fecha, etiquetas del encabezado y espacios. Puede usar
+    <span class="btn claro">🗂️ Programas</span> para partir de otro sábado parecido.</p>
+  </div></div>
+  <div class="paso"><div class="num">2</div><div>
+    <p><b>Me manda el enlace editable</b><span class="quien">autor</span></p>
+    <p>Botón <span class="btn claro">🔗 Enlace editable</span> y me lo pega por WhatsApp. Ese enlace
+    ya trae el programa completo adentro, no necesita mandarme nada más.</p>
+  </div></div>
+  <div class="paso"><div class="num">3</div><div>
+    <p><b>Lo reviso y lo publico</b><span class="quien">yo</span></p>
+    <p>Abro su enlace. Como yo tengo copia propia guardada, la página me pregunta si reemplazo la
+    mía: le digo que sí (mi copia no importa, la oficial es la que voy a publicar). Reviso horas y
+    nombres, y sigo el paso 3 de abajo.</p>
+  </div></div>
+  <div class="paso"><div class="num">4</div><div>
+    <p><b>Se reparte</b><span class="quien">autor</span></p>
+    <p>Ya publicado, el de turno manda al grupo el <span class="btn claro">👁️ Enlace de solo
+    lectura</span> o el PDF. El programa queda cerrado y nadie lo cambia sin querer.</p>
+  </div></div>
+  <div class="aviso"><b>Por qué este orden:</b> el paso 3 es el que crea la única versión oficial.
+  Si nos saltamos ese paso, lo que circula son fotos sueltas y el sábado aparecen dos programas
+  distintos. Es exactamente el problema que veníamos teniendo con las fotos de WhatsApp.</div>
+
+  <h2 id="publicar">3. Publicar, paso a paso</h2>
+  <ol>
+    <li>Abrir mi enlace de trabajo: <code>programas-tierra-linda.pages.dev/?publicar</code>
+      (si vengo del enlace de otra persona, agregarle <code>?publicar</code> antes del <code>#</code>).</li>
+    <li>Verificar arriba a la derecha el sello <b>⚙️ Modo publicación</b>.</li>
+    <li>Botón <span class="btn claro">⬇️ Publicar JSON</span>. Descarga el archivo con el nombre
+      de la fecha, por ejemplo <code>2026-09-05.json</code>, sacado del campo de fecha del programa.</li>
+    <li>En la terminal:</li>
+  </ol>
+<pre><span class="c"># desde ~/Documents/Iglesia/projects/programas-tierra-linda</span>
+mv ~/Downloads/2026-09-05.json programas/
+node tools/indexar.js
+git add -A
+git commit -m "Programa del 5 de septiembre"
+git push</pre>
+  <p>Cloudflare despliega en menos de un minuto. Verificación de 5 segundos: abrir la página en una
+  ventana privada (sin copia guardada) y confirmar que aparece la fecha nueva.</p>
+  <p><b>Nunca editar <code>programas/index.json</code> a mano.</b> Lo genera <code>indexar.js</code>
+  leyendo la carpeta, y el orden por nombre de archivo es lo que define cuál es el vigente.</p>
+
+  <h2 id="casos">4. Casos especiales</h2>
+
+  <h3>Corregir algo después de publicar</h3>
+  <p>Editar, volver a publicar con la <b>misma fecha</b> (el archivo se sobreescribe),
+  <code>node tools/indexar.js</code>, commit y push. El historial de la corrección queda en Git.</p>
+
+  <h3>Publicar con anticipación</h3>
+  <p>El vigente es el de la <b>fecha más nueva</b>, así que si publico el del 5 de septiembre un
+  lunes, desde ese lunes la gente ve el del 5. Eso es lo que uno quiere para el que está armando el
+  programa, pero conviene saberlo: no muestra "el de hoy", muestra el más adelantado.</p>
+
+  <h3>Revertir una publicación mala</h3>
+<pre>git rm programas/2026-09-05.json
+node tools/indexar.js
+git commit -m "Revertir el programa del 5" &amp;&amp; git push</pre>
+  <p>El vigente vuelve a ser el sábado anterior, que sigue en la carpeta.</p>
+
+  <h3>Dos personas editando el mismo sábado</h3>
+  <p>No hay edición simultánea y no la va a haber sin servidor. La regla: <b>una sola persona arma
+  el programa</b>, el de turno. Si alguien más tiene cambios, se los manda por texto y el de turno
+  los mete. El que publica define la versión oficial.</p>
+
+  <h3>Alguien perdió lo que estaba haciendo</h3>
+  <p>Primero <span class="btn claro">↶ Deshacer</span>, que guarda 40 pasos. Si ya cerró la página y
+  entró desde otro equipo, no hay recuperación: su copia vive en el equipo donde editaba. Por eso el
+  mensaje del manual insiste en mandarse el enlace a sí mismo cuando va a medias.</p>
+
+  <h3>Cambiar el logo</h3>
+  <p>Reemplazar <code>logo-tl.png</code> o <code>logo-sda.png</code> en el repositorio y hacer push.
+  El botón de reemplazar logo dentro de la página es solo para la copia de esa persona, no cambia el
+  logo de todos.</p>
+
+  <h2 id="demo">5. Guion de la demo, 6 minutos</h2>
+  <p>Orden pensado para que se entienda el valor antes de la mecánica. Abrir con el programa del
+  sábado ya cargado, no con la página vacía.</p>
+  <table>
+    <tr><th>Minuto</th><th>Qué muestro</th><th>Qué digo</th></tr>
+    <tr><td><b>0:00</b></td><td>La página abierta con el programa del sábado</td>
+      <td>"Esto es el programa del sábado, en el mismo formato que ya usamos. No hay que instalar nada ni crear cuenta."</td></tr>
+    <tr><td><b>0:45</b></td><td>Clic sobre un nombre y lo cambio</td>
+      <td>"Se escribe encima, así de simple. Aquí no hay campos ni formularios."</td></tr>
+    <tr><td><b>1:30</b></td><td>Cambio una hora y señalo los minutos</td>
+      <td>"Los minutos se calculan solos. Nadie tiene que sumar."</td></tr>
+    <tr><td><b>2:15</b></td><td>Muevo un espacio con ↑ y lo devuelvo con Deshacer</td>
+      <td>"Se puede reordenar, y si uno se equivoca, se deshace."</td></tr>
+    <tr><td><b>3:00</b></td><td>Imprimir / Guardar PDF</td>
+      <td>"Y de aquí sale el PDF de siempre, en una hoja, para el grupo."</td></tr>
+    <tr><td><b>4:00</b></td><td>Los dos enlaces, abriendo el de solo lectura</td>
+      <td>"Dos formas de compartir: uno para trabajar entre nosotros, y este de solo lectura para cuando ya está cerrado, que nadie puede cambiar."</td></tr>
+    <tr><td><b>5:00</b></td><td>El teléfono, en vista de tarjetas</td>
+      <td>"Y se puede hacer desde el celular, con letra grande."</td></tr>
+    <tr><td><b>5:30</b></td><td>El manual</td>
+      <td>"Todo esto está explicado en el manual, con el enlace en la misma página."</td></tr>
+  </table>
+  <div class="aviso"><b>Lo que no muestro en la demo:</b> el modo publicación, el JSON, el
+  repositorio, ni la palabra Git. Eso es mío. Si alguien pregunta cómo queda "el oficial", la
+  respuesta corta es "yo lo publico y a todos les aparece al entrar".</div>
+  <p><b>Antes de la demo, dos minutos de alistamiento:</b> entrar en una ventana privada para que
+  cargue el programa publicado y no mi copia de pruebas, tener el celular con la página abierta, y
+  tener listo el enlace de solo lectura para pegarlo en el grupo en vivo.</p>
+
+  <h2 id="andres">6. Qué pedirle a Andrés esta vez</h2>
+  <p>Andrés está de turno el sábado 22 y es el que va a estrenar esto. Lo que necesito de él es
+  concreto y en este orden:</p>
+  <ol>
+    <li><b>Que arme el programa del 22 en la página</b>, partiendo de lo que ya está cargado (que es
+      justo su programa, el que él preparó). Solo tiene que revisar y ajustar lo que cambie.</li>
+    <li><b>Que me mande el enlace editable</b> cuando lo tenga listo, para publicarlo yo.</li>
+    <li><b>Que reparta el enlace de solo lectura o el PDF</b> al grupo, no el editable.</li>
+    <li><b>Que me diga qué le estorbó.</b> Esto es lo que más me sirve: es el primero que lo usa de
+      verdad y con turno encima.</li>
+  </ol>
+  <p>Y lo que yo le doy, para que quede claro el intercambio: el programa ya cargado, el manual, y
+  yo publico y sostengo la herramienta. Él no tiene que aprender nada técnico.</p>
+
+  <h2 id="checklist">7. Rutina semanal en una tarjeta</h2>
+  <table>
+    <tr><th>Cuándo</th><th>Qué</th></tr>
+    <tr><td>Jueves</td><td>Recordarle al de turno que arme el programa en la página y me mande el enlace editable.</td></tr>
+    <tr><td>Viernes a.m.</td><td>Revisar, publicar (4 comandos) y confirmar en ventana privada.</td></tr>
+    <tr><td>Viernes p.m.</td><td>Que el de turno reparta el enlace de solo lectura o el PDF.</td></tr>
+    <tr><td>Cada tanto</td><td>Correr las pruebas antes de tocar el código: <code>node tests/horas.js</code>, <code>node tests/modelo.js</code>.</td></tr>
+  </table>
+  <p style="margin-top:24px"><a href="./?publicar" style="color:var(--verde2)">← Ir a la aplicación en modo publicación</a>
+  &nbsp;·&nbsp; <a href="./manual.html" style="color:var(--verde2)">Manual de los autores</a></p>
+</div>
+</body></html>
