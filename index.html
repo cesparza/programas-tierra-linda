@@ -73,8 +73,12 @@
   .dirige .rol { font-size: 9.3px; color: var(--gris); margin-top: 1px; }
   .chip { display: inline-block; font-family: 'Poppins'; font-weight: 500; font-size: 7.6px; letter-spacing: 1.1px; text-transform: uppercase; color: var(--oro); border: 0.9px solid var(--oro); border-radius: 999px; padding: 1.5px 8px; margin-top: 2.5px; }
 
+  .spine-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; height: 100%; }
+  .sbtn { width: 19px; height: 16px; border: 1px solid rgba(255,255,255,.45); background: transparent; color: #fff; border-radius: 4px; font-size: 9px; line-height: 1; cursor: pointer; padding: 0; }
+  .sbtn:hover { background: rgba(255,255,255,.2); }
+
   /* columna de acciones por fila (no se imprime) */
-  .ops { width: 60px; border-bottom: none !important; border-top: none !important; white-space: nowrap; }
+  .ops { width: 104px; border-bottom: none !important; border-top: none !important; white-space: nowrap; }
   .ops button { border: 1px solid var(--linea); background: #fff; color: var(--gris); border-radius: 6px; width: 22px; height: 22px; cursor: pointer; font-size: 12px; margin-left: 3px; }
   .ops button:hover { color: var(--verde); border-color: var(--verde2); }
 
@@ -88,7 +92,7 @@
 
   @media print {
     body { background: #fff; }
-    .toolbar, .ops, .meta .quitar, .meta .agregar { display: none !important; }
+    .toolbar, .ops, .sbtn, .meta .quitar, .meta .agregar { display: none !important; }
     .hoja { margin: 0; box-shadow: none; width: 11in; height: 8.5in; }
     header img:hover { outline: none; }
     [contenteditable]:hover, [contenteditable]:focus { outline: none; background: transparent; }
@@ -104,7 +108,7 @@
   <button onclick="descargarHTML()">💾 Descargar copia</button>
   <button onclick="restablecer()">↺ Restablecer ejemplo</button>
   <span id="estado"></span>
-  <span class="aviso">Todo es editable con un clic: títulos, etiquetas, secciones, horas y responsables. En cada fila: ➕ agrega un espacio, 👤 pone o quita el sello, ✕ lo elimina. Clic en un logo para reemplazarlo. Los cambios se guardan solos en este navegador.</span>
+  <span class="aviso">Todo es editable con un clic: títulos, etiquetas, secciones, horas y responsables. En cada fila: ↑↓ la mueven (al llegar al borde pasa a la sección vecina), ➕ agrega un espacio, 👤 pone o quita el sello, ✕ lo elimina. Las flechas de la banda verde mueven la sección completa. Clic en un logo para reemplazarlo. Los cambios se guardan solos en este navegador.</span>
 </div>
 
 <div class="hoja">
@@ -182,7 +186,11 @@ function render() {
       const tr = document.createElement('tr');
       if (fi === 0) {
         tr.className = 'sec-first';
-        tr.innerHTML = `<td class="spine" rowspan="${sec.filas.length}"><span contenteditable data-sec="${si}">${sec.nombre}</span></td>`;
+        tr.innerHTML = `<td class="spine" rowspan="${sec.filas.length}"><div class="spine-wrap">
+          <button class="sbtn" title="Subir esta sección" onclick="moverSeccion(${si},-1)">↑</button>
+          <span contenteditable data-sec="${si}">${sec.nombre}</span>
+          <button class="sbtn" title="Bajar esta sección" onclick="moverSeccion(${si},1)">↓</button>
+        </div></td>`;
       }
       tr.innerHTML += `
         <td class="hora"><div class="rango" contenteditable data-f="${si}.${fi}.hora">${f.hora}</div>
@@ -193,6 +201,8 @@ function render() {
           ${f.chip ? `<span class="chip" contenteditable data-f="${si}.${fi}.chipText">${f.chipText || 'Anciano de turno'}</span>`
                    : `<div class="rol" contenteditable data-f="${si}.${fi}.rol">${f.rol}</div>`}</td>
         <td class="ops">
+          <button title="Subir este espacio" onclick="moverFila(${si},${fi},-1)">↑</button>
+          <button title="Bajar este espacio" onclick="moverFila(${si},${fi},1)">↓</button>
           <button title="Agregar espacio debajo" onclick="agregarFila(${si},${fi})">➕</button>
           <button title="Sello (ej. anciano de turno)" onclick="alternarChip(${si},${fi})">👤</button>
           <button title="Quitar este espacio" onclick="quitarFila(${si},${fi})">✕</button>
@@ -232,6 +242,31 @@ function alternarChip(si, fi) {
   const f = modelo.secciones[si].filas[fi];
   f.chip = !f.chip;
   if (f.chip) { f.chipText = f.chipText || 'Anciano de turno'; f.rol = ''; }
+  render(); guardar();
+}
+/* mueve una fila dentro de su seccion; en el borde pasa a la seccion vecina */
+function moverFila(si, fi, dir) {
+  leerDOM();
+  const secs = modelo.secciones, sec = secs[si], destino = fi + dir;
+  if (destino >= 0 && destino < sec.filas.length) {
+    const [f] = sec.filas.splice(fi, 1);
+    sec.filas.splice(destino, 0, f);
+  } else {
+    const sj = si + dir;
+    if (sj < 0 || sj >= secs.length) return;
+    const [f] = sec.filas.splice(fi, 1);
+    if (dir < 0) secs[sj].filas.push(f); else secs[sj].filas.unshift(f);
+    if (sec.filas.length === 0) secs.splice(si, 1);
+  }
+  render(); guardar();
+}
+/* mueve la seccion completa, con sus filas */
+function moverSeccion(si, dir) {
+  leerDOM();
+  const sj = si + dir;
+  if (sj < 0 || sj >= modelo.secciones.length) return;
+  const [s] = modelo.secciones.splice(si, 1);
+  modelo.secciones.splice(sj, 0, s);
   render(); guardar();
 }
 function agregarSeccion() { leerDOM(); modelo.secciones.push({ nombre: 'NUEVA SECCIÓN', filas: [FILA_NUEVA()] }); render(); guardar(); }
