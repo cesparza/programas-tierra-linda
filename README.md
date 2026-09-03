@@ -82,7 +82,7 @@ git add -A && git commit -m "Programa del 5 de septiembre" && git push
 
 | Ruta | Método | Auth | Qué hace |
 |---|---|---|---|
-| `/api/vigente` | GET | pública | El último programa publicado |
+| `/api/vigente` | GET | pública | El programa de la fecha más próxima que no ha pasado (día de Colombia); si no hay futuros, el más reciente. Permite dejar publicados varios sábados: cada uno se estrena solo |
 | `/api/programas` | GET | pública | Lista de fechas publicadas |
 | `/api/programa/AAAA-MM-DD` | GET | pública | Un programa puntual |
 | `/api/publicar` | POST | código de autor | Guarda/actualiza el programa de su fecha |

@@ -1108,14 +1108,21 @@ async function listaPublicados() {
   const porFecha = {};
   try {
     (await apiJSON('programas')).forEach(p => {
-      porFecha[p.fecha] = { ref: p.fecha, deAPI: true, fecha: fechaLarga(p.fecha), titulo: p.titulo, espacios: p.espacios };
+      porFecha[p.fecha] = { ref: p.fecha, deAPI: true, iso: p.fecha, fecha: fechaLarga(p.fecha), titulo: p.titulo, espacios: p.espacios };
     });
   } catch (e) { /* sin API: queda solo el repositorio */ }
   ((await leerIndice()) || []).forEach(p => {
     const iso = String(p.archivo || '').replace('.json', '');
-    if (!porFecha[iso]) porFecha[iso] = { ref: p.archivo, deAPI: false, fecha: p.fecha, titulo: p.titulo, espacios: p.espacios };
+    if (!porFecha[iso]) porFecha[iso] = { ref: p.archivo, deAPI: false, iso: iso, fecha: p.fecha, titulo: p.titulo, espacios: p.espacios };
   });
-  return Object.keys(porFecha).sort().reverse().map(k => porFecha[k]);
+  const lista = Object.keys(porFecha).sort().reverse().map(k => porFecha[k]);
+  /* el vigente es el de la fecha más próxima que aún no pasa (misma regla del API);
+     si todos son pasados, el más reciente (el primero de la lista) */
+  const hoy = new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10);
+  let vigente = 0;
+  for (let i = lista.length - 1; i >= 0; i--) { if (lista[i].iso >= hoy) { vigente = i; break; } }
+  lista.forEach((p, i) => { p.vigente = (i === vigente); });
+  return lista;
 }
 async function abrirDelHistorico(ref, deAPI) {
   try {
@@ -1146,9 +1153,9 @@ async function verHistorico() {
     '<h3>Programas publicados</h3>' +
     (!lista.length
       ? '<p class="vacio">Todavía no hay programas publicados.</p>'
-      : '<ul>' + lista.map((p, i) =>
+      : '<ul>' + lista.map(p =>
           '<li><button class="abrir" onclick="abrirDelHistorico(\'' + esc(p.ref) + '\',' + (p.deAPI ? 'true' : 'false') + ')">' +
-          esc(p.fecha) + (i === 0 ? '<span class="vigente">vigente</span>' : '') +
+          esc(p.fecha) + (p.vigente ? '<span class="vigente">vigente</span>' : '') +
           '<span class="detalle">' + esc(p.titulo) + ' · ' + (p.espacios || 0) + ' espacios</span>' +
           '</button></li>').join('') + '</ul>');
   document.body.appendChild(panel);

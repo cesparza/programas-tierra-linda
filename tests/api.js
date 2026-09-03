@@ -54,6 +54,21 @@ const post = (ruta, cuerpo, headers) => llamar(ruta, {
   r = await llamar('programas');
   ok('la lista tiene una sola entrada', r.status === 200 && r.json.length === 1 && r.json[0].publicado_por === undefined);
 
+  console.log('Programas futuros (el vigente es el más próximo que no ha pasado):');
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const fechaTexto = d => 'Sábado ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ' de ' + d.getFullYear();
+  const iso = d => d.toISOString().slice(0, 10);
+  const cercano = new Date(Date.now() + 2 * 86400e3);      /* pasado mañana */
+  const lejano = new Date(Date.now() + 60 * 86400e3);      /* en dos meses */
+  r = await post('publicar', { token, programa: Object.assign({}, fixture, { fecha: fechaTexto(lejano) }) });
+  ok('publica un programa a dos meses', r.status === 200 && r.json.fecha === iso(lejano), JSON.stringify(r.json));
+  r = await post('publicar', { token, programa: Object.assign({}, fixture, { fecha: fechaTexto(cercano) }) });
+  ok('publica el de esta semana', r.status === 200);
+  r = await llamar('vigente');
+  ok('el vigente es el próximo, no el más lejano', r.status === 200 && r.json.fecha === iso(cercano), 'vigente: ' + (r.json && r.json.fecha));
+  r = await llamar('programas');
+  ok('la lista trae los tres', r.status === 200 && r.json.length === 3);
+
   console.log('Rechazos:');
   r = await post('publicar', { token, programa: Object.assign({}, fixture, { fecha: 'un día cualquiera' }) });
   ok('fecha ilegible → 400', r.status === 400);

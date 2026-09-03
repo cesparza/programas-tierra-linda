@@ -136,7 +136,13 @@ export async function onRequest(context) {
   try {
     /* ---- lecturas públicas ---- */
     if (metodo === 'GET' && ruta === 'vigente') {
-      const fila = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en, json FROM programa ORDER BY fecha DESC LIMIT 1').first();
+      /* El vigente es el del sábado que viene, no el último publicado: la fecha más
+         próxima que aún no pasa (día de Colombia, UTC-5). Así se pueden dejar
+         publicados varios sábados futuros y cada uno se estrena solo, a medianoche
+         del anterior. Si no hay ninguno por venir, se muestra el más reciente. */
+      const hoy = new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10);
+      let fila = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en, json FROM programa WHERE fecha >= ?1 ORDER BY fecha ASC LIMIT 1').bind(hoy).first();
+      if (!fila) fila = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en, json FROM programa ORDER BY fecha DESC LIMIT 1').first();
       if (!fila) return error('Todavía no hay programas publicados.', 404);
       return responder({ fecha: fila.fecha, titulo: fila.titulo, espacios: fila.espacios, actualizado_en: fila.actualizado_en, programa: JSON.parse(fila.json) });
     }
