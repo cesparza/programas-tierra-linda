@@ -24,15 +24,20 @@ manual está escrito sin una sola palabra técnica.
 
 ## Estado del proyecto
 
-Sin dependencias en tiempo de ejecución, sin paso de compilación, sin servidor y sin base
-de datos. `index.html` es la fuente: se edita a mano. No existe ningún generador.
+Página estática sin dependencias ni compilación, más una pieza de servidor mínima: un
+Pages Function (`/api/*`) y una base D1 para que los autores publiquen sin pasar por
+Git. `index.html` es la fuente: se edita a mano. No existe ningún generador. Sin la
+base, la página funciona igual que la versión estática.
 
 ## Archivos
 
 | Archivo | Qué es |
 |---|---|
-| `index.html` | La aplicación completa: HTML, CSS y JavaScript en un archivo (~57 KB). |
-| `manual.html` | Manual de uso para autores. Doce secciones, sin lenguaje técnico. |
+| `index.html` | La aplicación completa: HTML, CSS y JavaScript en un archivo (~60 KB). |
+| `functions/api/[[ruta]].js` | El API de publicación (~190 líneas). Ver "La base de datos y el API". |
+| `migrations/0001_inicial.sql` | Esquema de la base D1 `programas-tl`. |
+| `wrangler.toml` | Binding de la base al proyecto de Pages. |
+| `manual.html` | Manual de uso para autores. Sin lenguaje técnico. |
 | `programas/AAAA-MM-DD.json` | Un archivo por programa publicado. |
 | `programas/index.json` | Índice generado. **El primero de la lista es el vigente.** |
 | `programa-actual.json` | Respaldo del vigente por si el índice falta. |
@@ -40,6 +45,8 @@ de datos. `index.html` es la fuente: se edita a mano. No existe ningún generado
 | `tests/horas.js` | 19 casos del cálculo de duración. |
 | `tests/modelo.js` | Serialización, estados dañados y filtrado de HTML. |
 | `tests/vistas.js` | Tarjetas y hoja en cuatro pantallas, más impresión. Necesita servidor local. |
+| `tests/api.js` | 18 casos del API: publicar, autores, rechazos, revocación y límite de intentos. |
+| `tests/publicar.js` | El flujo de publicar desde la página, con navegador real. |
 | `tools/indexar.js` | Regenera `programas/index.json`. |
 | `tools/capturas.js` | Vuelve a tomar las imágenes del manual desde la aplicación real. |
 | `tools/optimizar-capturas.py` | Reduce el peso de esas imágenes. |
@@ -49,17 +56,47 @@ de datos. `index.html` es la fuente: se edita a mano. No existe ningún generado
 
 ## Publicar el programa de la semana
 
+Desde la versión con base de datos, publicar es un botón dentro de la página: el autor
+abre su enlace de autor una vez (queda guardado en su navegador), arma el programa y
+toca **☁️ Publicar**. El servidor valida su código, guarda el programa por fecha en D1
+y desde ese momento es lo que ve quien abra la página, **salvo** que tenga uno propio
+guardado o venga por un enlace compartido: el vigente nunca pisa el trabajo de nadie.
+
+El flujo por Git sigue existiendo como respaldo (y es lo que ve quien abre el sitio si
+la base no responde):
+
 ```bash
-# 1. Armar el programa en https://programas-tierra-linda.pages.dev/?publicar
-# 2. Botón "⬇️ Publicar JSON": descarga 2026-09-05.json (el nombre sale de la fecha)
+# 1. Botón "⬇️ Descargar JSON": descarga 2026-09-05.json (el nombre sale de la fecha)
 mv ~/Downloads/2026-09-05.json programas/
 node tools/indexar.js
 git add -A && git commit -m "Programa del 5 de septiembre" && git push
 ```
 
-Cloudflare Pages despliega en menos de un minuto. Desde ese momento, quien entre a la
-página ve ese programa, **salvo** que tenga uno propio guardado o venga por un enlace
-compartido: el vigente nunca pisa el trabajo de nadie.
+## La base de datos y el API
+
+- **D1 `programas-tl`** (cuenta personal de Cloudflare), binding `DB` declarado en
+  `wrangler.toml`. Esquema en `migrations/0001_inicial.sql`: `programa` (una fila por
+  fecha, upsert), `autor` (nombre + SHA-256 del código, revocable con `activo`) e
+  `intento` (fallos de autenticación por IP).
+- **`functions/api/[[ruta]].js`** atiende `/api/*`:
+
+| Ruta | Método | Auth | Qué hace |
+|---|---|---|---|
+| `/api/vigente` | GET | pública | El último programa publicado |
+| `/api/programas` | GET | pública | Lista de fechas publicadas |
+| `/api/programa/AAAA-MM-DD` | GET | pública | Un programa puntual |
+| `/api/publicar` | POST | código de autor | Guarda/actualiza el programa de su fecha |
+| `/api/autores` | GET/POST | clave de mantenedor | Lista / crea autores (el código se muestra una sola vez) |
+| `/api/autores/estado` | POST | clave de mantenedor | Activa o desactiva un autor |
+
+- Defensas (las tres lecciones de la app de jóvenes, desde el día uno): placeholders en
+  todo SQL, `Origin` propio exigido en cada POST cuando el navegador lo manda, y 429
+  tras 10 fallos de autenticación por IP en 15 minutos. La fecha-clave se deriva en el
+  servidor y los logos nunca se guardan en la base.
+- `CLAVE_MANTENEDOR` es una variable secreta del proyecto en Pages
+  (Settings → Environment variables). No vive en el repositorio.
+- Si el API no responde (base sin configurar, sitio abierto como archivo), **todo cae
+  al flujo anterior** sin error visible: índice del repositorio y `programa-actual.json`.
 
 ## Cómo decide la aplicación qué mostrar
 
@@ -68,15 +105,21 @@ Orden de precedencia al abrir:
 1. **Enlace compartido** (`#...` en la dirección). Si la persona ya tiene un programa
    guardado, se le pregunta antes de reemplazarlo. En `?ver` no se pregunta ni se guarda.
 2. **Lo guardado en el equipo** (`localStorage`, clave `programa-editable-v1`).
-3. **El vigente** (`programas/index.json` → primer archivo; si falla, `programa-actual.json`).
-4. **El ejemplo interno** que va dentro de `index.html`, para que la página nunca abra vacía.
+3. **El vigente de la base** (`GET /api/vigente`).
+4. **El vigente del repositorio** (`programas/index.json` → primer archivo; si falla,
+   `programa-actual.json`).
+5. **El ejemplo interno** que va dentro de `index.html`, para que la página nunca abra vacía.
+
+El histórico (🗂️ Programas) une la base y el repositorio: la base manda cuando una
+fecha existe en ambos.
 
 ## Modos y parámetros de la dirección
 
 | Parámetro | Efecto |
 |---|---|
 | `?ver` | Solo lectura: sin campos editables, sin guardar nada, y la barra reducida a Imprimir y Manual (más el cambio de vista en celular). |
-| `?publicar` | Muestra "Publicar JSON" y "Descargar copia", con un sello ⚙️ en la barra. |
+| `?publicar` | Muestra "Descargar JSON", "Descargar copia" y "👥 Autores", con un sello ⚙️ en la barra. |
+| `?a=CÓDIGO` | Enlace de autor: guarda el código en el navegador, se limpia de la dirección y habilita ☁️ Publicar. |
 | `#z.…` | Programa comprimido con deflate (formato actual, ~2.000 caracteres). |
 | `#…` | Programa sin comprimir (formato viejo). Se sigue leyendo para no romper enlaces ya repartidos. |
 
@@ -128,6 +171,8 @@ un archivo a medias o un enlace viejo nunca dejan la página en blanco.
 | `TOPE_LOGO` | 400 KB | Más grande no cabe en `localStorage` y rompía todo guardado posterior. |
 | `TOPE_HISTORIAL` | 40 | Pasos de deshacer. |
 | Enlace | 8.000 caracteres | Pasado ese punto avisa en vez de copiar un enlace que WhatsApp cortaría. |
+| `TOPE_BODY` (API) | 200 KB | Un programa sin logos pesa ~6 KB; más que esto no es un programa. |
+| `FALLOS_MAX` (API) | 10 en 15 min | Fallos de autenticación por IP antes del 429. |
 
 ## Pruebas
 
@@ -137,6 +182,16 @@ node tests/horas.js
 node tests/modelo.js
 python3 -m http.server 8787      # en otra terminal, desde la raíz
 node tests/vistas.js
+```
+
+Las del API y el flujo de publicar necesitan el servidor local con base:
+
+```bash
+npx wrangler d1 execute programas-tl --local --file migrations/0001_inicial.sql
+npx wrangler pages dev . --port 8788 --binding CLAVE_MANTENEDOR=clave-prueba-123   # otra terminal
+node tests/publicar.js
+node tests/api.js      # va de último: sus fallos a propósito activan el 429 local
+# para repetir la tanda: npx wrangler d1 execute programas-tl --local --command "DELETE FROM intento"
 ```
 
 `tests/vistas.js` necesita servidor porque la página pide `programas/index.json` y los
@@ -194,10 +249,13 @@ Quien necesite editar pide el enlace editable, o usa el histórico desde la pág
 3. **Los logos son archivos, no base64.** Con el base64 embebido, el HTML tenía líneas de
    78.000 caracteres y ningún visor de diff lo abría. Al descargar una copia se incrustan
    al vuelo con `fetch` y `FileReader`.
-4. **Sin servidor.** Se evaluó un Worker con KV para tener una versión compartida y se
-   descartó: agrega despliegue aparte, secretos, autorización y consistencia eventual para
-   un grupo que se coordina por WhatsApp. Con el JSON en el repositorio, Git da además el
-   historial de cada sábado.
+4. **Backend mínimo, y solo para publicar.** La primera versión fue 100% estática: se
+   evaluó un Worker con KV y se descartó porque publicar por Git alcanzaba. El cuello de
+   botella real apareció después: cada publicación pasaba por el mantenedor. La versión
+   actual agrega exactamente esa pieza — D1 + un Function corto para `POST /api/publicar`
+   y sus lecturas — copiando los patrones de la app de jóvenes pero no su plataforma:
+   sin cuentas, sin cookies, sin OAuth. Todo lo demás sigue siendo estático, y sin base
+   la página funciona igual que antes.
 5. **Todo el texto del usuario se escapa al pintar**, y `recos` se filtra con `DOMParser`
    sobre un documento inerte, no con un `div` temporal: asignarle `innerHTML` a un `div`
    ya dispara la carga de imágenes y con eso un `onerror`.
@@ -214,7 +272,9 @@ Quien necesite editar pide el enlace editable, o usa el histórico desde la pág
 | SmartGit no muestra el diff de un archivo | Alguna línea pasa de 10.000 caracteres. El hook lo bloquea antes; si se cuela, partir el contenido o sacarlo a un archivo. |
 | "No se pudo guardar en este navegador" | `localStorage` lleno, casi siempre por un logo pesado. La aplicación reintenta guardando sin logos. |
 | Un push no despliega | Integración de Git desconectada en Cloudflare. Ver la sección de despliegue. |
-| El programa vigente no aparece | Falta correr `node tools/indexar.js`, o el JSON quedó mal formado. La aplicación cae al respaldo y al ejemplo. |
+| El programa vigente no aparece | Con base: revisar `GET /api/vigente` (404 = nada publicado; 503 = binding DB sin configurar). Sin base: falta `node tools/indexar.js` o el JSON quedó mal formado. La aplicación cae al respaldo y al ejemplo. |
+| "El enlace de autor no es válido" | El código fue desactivado en 👥 Autores o se pegó incompleto. Crear uno nuevo y reenviar el enlace `?a=`. |
+| 429 "Demasiados intentos" | Diez fallos de autenticación desde esa IP en 15 minutos. Esperar 15 minutos; si es un ataque de adivinación, ya está haciendo su trabajo. |
 
 ## Pendientes
 

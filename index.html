@@ -124,17 +124,17 @@
   body.solo-lectura .espacio .sub:empty::before,
   body.solo-lectura .dirige .rol:empty::before { content: ''; }
   /* panel del historico */
-  #panel-programas {
+  #panel-programas, #panel-autores {
     position: fixed; z-index: 60; top: 56px; left: 50%; transform: translateX(-50%);
     width: min(420px, 92vw); max-height: 60vh; overflow-y: auto;
     background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.28);
     padding: 14px 16px; font-family: 'Segoe UI', sans-serif;
   }
-  #panel-programas h3 {
+  #panel-programas h3, #panel-autores h3 {
     font-family: 'Poppins'; font-weight: 500; font-size: 12px; letter-spacing: 1.6px;
     text-transform: uppercase; color: var(--verde); margin-bottom: 10px;
   }
-  #panel-programas .cerrar { position: absolute; top: 10px; right: 12px; border: none; background: none;
+  #panel-programas .cerrar, #panel-autores .cerrar { position: absolute; top: 10px; right: 12px; border: none; background: none;
     font-size: 15px; color: var(--gris); cursor: pointer; }
   #panel-programas ul { list-style: none; }
   #panel-programas li { border-top: 1px solid var(--linea); }
@@ -148,6 +148,18 @@
   #panel-programas .vigente { font-family: 'Poppins'; font-size: 9px; letter-spacing: 1px;
     text-transform: uppercase; color: var(--oro-texto); border: 1px solid var(--oro-texto);
     border-radius: 999px; padding: 1px 7px; margin-left: 6px; }
+  /* panel de autores (solo en modo publicación) */
+  #panel-autores .fila-autor { display: flex; align-items: center; gap: 8px; padding: 8px 4px;
+    border-top: 1px solid var(--linea); font-size: 13.5px; color: var(--tinta); }
+  #panel-autores .fila-autor .nombre-inactivo { color: var(--gris); text-decoration: line-through; }
+  #panel-autores .fila-autor span { flex: 1; }
+  #panel-autores .fila-autor button, #panel-autores .crear button {
+    border: 1px solid var(--linea); background: #fff; border-radius: 8px; padding: 5px 10px;
+    font-size: 12px; cursor: pointer; min-height: 34px; }
+  #panel-autores .crear { display: flex; gap: 8px; margin-top: 10px; }
+  #panel-autores .crear input { flex: 1; border: 1px solid var(--linea); border-radius: 8px;
+    padding: 5px 10px; font-size: 13px; min-height: 34px; }
+  #panel-autores .nota { font-size: 11.5px; color: var(--gris); margin-top: 8px; }
   #panel-programas .vacio { font-size: 13px; color: var(--gris); }
   @media print { #panel-programas { display: none !important; } }
 
@@ -251,7 +263,9 @@
   <button class="solo-publicar" onclick="descargarHTML()">💾 Descargar copia</button>
   <button class="solo-edicion" onclick="restablecer()" title="Volver al programa publicado y borrar tus cambios">↺ Restablecer</button>
   <button id="btn-historico" class="solo-edicion" onclick="verHistorico()" title="Abrir el programa de otro sábado">🗂️ Programas</button>
-  <button class="solo-edicion solo-publicar" onclick="publicarJSON()" title="Descargar el JSON con el nombre de la fecha, para publicarlo en la carpeta programas/">⬇️ Publicar JSON</button>
+  <button id="btn-publicar" class="solo-edicion" onclick="publicarEnLinea()" title="Publicar este programa para que todos lo vean al abrir la página">☁️ Publicar</button>
+  <button class="solo-edicion solo-publicar" onclick="publicarJSON()" title="Descargar el JSON con el nombre de la fecha, el respaldo en la carpeta programas/">⬇️ Descargar JSON</button>
+  <button class="solo-publicar" onclick="verAutores()" title="Crear y desactivar los enlaces de autor">👥 Autores</button>
   <button id="btn-deshacer" class="solo-edicion" onclick="deshacer()" disabled title="Deshacer el último cambio de estructura (Ctrl+Z)">↶ Deshacer</button>
   <button id="btn-vista" onclick="alternarVista()" title="Cambiar entre la vista de celular y la hoja impresa">⤢ Ver como se imprime</button>
   <a class="boton-manual" href="manual.html" target="_blank" rel="noopener">📖 Manual</a>
@@ -1022,12 +1036,40 @@ window.addEventListener('orientationchange', ajustarEscala);
    cuando la persona no trae un enlace compartido ni tiene un programa propio guardado,
    asi nunca pisa el trabajo de nadie. Si el archivo no existe, queda el ejemplo interno. */
 const OFICIAL = 'programa-actual.json';
-/* El vigente es el primero del indice; si no hay indice se usa programa-actual.json. */
+/* ---------- API de publicación (D1) ----------
+   La fuente vigente es la base de datos: quien tiene enlace de autor publica desde la
+   página y todos ven el resultado al instante. Si el API no responde (sitio abierto
+   como archivo, base sin configurar, red caída), todo cae al flujo anterior:
+   programas/index.json y programa-actual.json publicados con un commit. */
+const API = 'api/';
+async function apiJSON(ruta, cuerpo) {
+  const opciones = cuerpo
+    ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(cuerpo) }
+    : { cache: 'no-store' };
+  const respuesta = await fetch(API + ruta, opciones);
+  const datos = await respuesta.json().catch(() => null);
+  if (!respuesta.ok) throw Object.assign(new Error((datos && datos.error) || ('HTTP ' + respuesta.status)), { status: respuesta.status });
+  return datos;
+}
+/* "2026-09-19" -> "Sábado 19 de septiembre de 2026", para mostrar las fechas de la base
+   con las mismas palabras que usa el programa. */
+function fechaLarga(iso) {
+  try {
+    const texto = new Date(iso + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
+  } catch (e) { return iso; }
+}
+/* El vigente es el ultimo publicado en la base; si el API no responde, el primero del
+   indice del repositorio; si tampoco, programa-actual.json. */
 async function cargarOficial(forzar) {
   try {
     if (!forzar && (location.hash.length > 1 || leerGuardado())) return false;
     let datos = null;
-    const lista = await leerIndice();
+    try {
+      const vigente = await apiJSON('vigente');
+      if (vigente && vigente.programa) datos = vigente.programa;
+    } catch (e) { /* sin API: se sigue con el repositorio */ }
+    const lista = datos ? null : await leerIndice();
     if (lista && lista.length) {
       const respuesta = await fetch(CARPETA + lista[0].archivo, { cache: 'no-store' });
       if (respuesta.ok) datos = await respuesta.json();
@@ -1060,12 +1102,32 @@ async function leerIndice() {
     return indiceProgramas;
   } catch (e) { return null; }
 }
-async function abrirDelHistorico(archivo) {
+/* Lista unificada del historico: la base primero; el indice del repositorio completa
+   las fechas que la base no tenga (los programas de antes del API). */
+async function listaPublicados() {
+  const porFecha = {};
   try {
-    const respuesta = await fetch(CARPETA + archivo, { cache: 'no-store' });
-    if (!respuesta.ok) throw new Error('no se encontro ' + archivo);
-    const datos = await respuesta.json();
-    if (leerGuardado() && !confirm('Vas a abrir el programa de ' + (datos.fecha || archivo) +
+    (await apiJSON('programas')).forEach(p => {
+      porFecha[p.fecha] = { ref: p.fecha, deAPI: true, fecha: fechaLarga(p.fecha), titulo: p.titulo, espacios: p.espacios };
+    });
+  } catch (e) { /* sin API: queda solo el repositorio */ }
+  ((await leerIndice()) || []).forEach(p => {
+    const iso = String(p.archivo || '').replace('.json', '');
+    if (!porFecha[iso]) porFecha[iso] = { ref: p.archivo, deAPI: false, fecha: p.fecha, titulo: p.titulo, espacios: p.espacios };
+  });
+  return Object.keys(porFecha).sort().reverse().map(k => porFecha[k]);
+}
+async function abrirDelHistorico(ref, deAPI) {
+  try {
+    let datos;
+    if (deAPI) {
+      datos = await apiJSON('programa/' + ref);
+    } else {
+      const respuesta = await fetch(CARPETA + ref, { cache: 'no-store' });
+      if (!respuesta.ok) throw new Error('no se encontro ' + ref);
+      datos = await respuesta.json();
+    }
+    if (leerGuardado() && !confirm('Vas a abrir el programa de ' + (datos.fecha || ref) +
         '.\n\n¿Reemplazar el que tienes en este dispositivo?')) return;
     anotarHistorial();
     modelo = normalizar(datos);
@@ -1077,15 +1139,15 @@ async function abrirDelHistorico(archivo) {
 function cerrarPanel() { const p = document.getElementById('panel-programas'); if (p) p.remove(); }
 async function verHistorico() {
   cerrarPanel();
-  const lista = await leerIndice();
+  const lista = await listaPublicados();
   const panel = document.createElement('div');
   panel.id = 'panel-programas';
   panel.innerHTML = '<button class="cerrar" onclick="cerrarPanel()" title="Cerrar">✕</button>' +
     '<h3>Programas publicados</h3>' +
-    (!lista || !lista.length
-      ? '<p class="vacio">Todavía no hay programas publicados en el repositorio.</p>'
+    (!lista.length
+      ? '<p class="vacio">Todavía no hay programas publicados.</p>'
       : '<ul>' + lista.map((p, i) =>
-          '<li><button class="abrir" onclick="abrirDelHistorico(\'' + esc(p.archivo) + '\')">' +
+          '<li><button class="abrir" onclick="abrirDelHistorico(\'' + esc(p.ref) + '\',' + (p.deAPI ? 'true' : 'false') + ')">' +
           esc(p.fecha) + (i === 0 ? '<span class="vigente">vigente</span>' : '') +
           '<span class="detalle">' + esc(p.titulo) + ' · ' + (p.espacios || 0) + ' espacios</span>' +
           '</button></li>').join('') + '</ul>');
@@ -1119,6 +1181,109 @@ async function publicarJSON() {
   a.click();
   marcarEstado('Descargado ' + nombre);
 }
+
+/* ---------- publicación en línea ----------
+   El autor publica con su código personal (viaja una sola vez en el enlace ?a=... y
+   queda guardado en su navegador). El servidor valida el código, quita los logos y
+   guarda el programa por fecha. No es autenticación de usuarios: es el mismo espíritu
+   de los roles por parámetro, con un código que sí se puede revocar. */
+const CLAVE_TOKEN = 'programa-autor-token';
+function tokenAutor() { try { return localStorage.getItem(CLAVE_TOKEN) || ''; } catch (e) { return ''; } }
+function guardarToken(t) { try { t ? localStorage.setItem(CLAVE_TOKEN, t) : localStorage.removeItem(CLAVE_TOKEN); } catch (e) {} }
+async function publicarEnLinea() {
+  leerDOM();
+  let token = tokenAutor();
+  if (!token) {
+    token = (prompt('Para publicar necesitas tu código de autor.\n\nSi Camilo te pasó un enlace con ?a=..., ábrelo una vez y el código queda guardado aquí. También puedes pegar el código:') || '').trim();
+    if (!token) return;
+  }
+  if (!confirm('Vas a publicar "' + (modelo.fecha || 'este programa') + '".\n\nDesde ese momento es lo que ve todo el que abra la página. ¿Publicar?')) return;
+  const copia = JSON.parse(JSON.stringify(modelo));
+  delete copia.logos;
+  try {
+    const r = await apiJSON('publicar', { token: token, programa: copia });
+    guardarToken(token);
+    marcarEstado('Publicado ✓ — vigente desde ahora (' + r.fecha + ')', true);
+  } catch (e) {
+    if (e.status === 401) { guardarToken(''); alert(e.message); }
+    else alert('No se pudo publicar: ' + e.message + (e.status >= 500 || !e.status ? '\n\nMientras tanto: "Descargar JSON" y pásaselo a Camilo.' : ''));
+  }
+}
+
+/* ---------- administración de autores (solo modo publicación) ---------- */
+const CLAVE_MANT = 'programa-clave-mantenedor';
+function pedirClaveMantenedor(reintento) {
+  let clave = '';
+  try { clave = localStorage.getItem(CLAVE_MANT) || ''; } catch (e) {}
+  if (!clave || reintento) {
+    clave = (prompt('Clave del mantenedor (la variable CLAVE_MANTENEDOR del proyecto en Cloudflare):') || '').trim();
+    if (clave) { try { localStorage.setItem(CLAVE_MANT, clave); } catch (e) {} }
+  }
+  return clave;
+}
+async function apiMantenedor(ruta, cuerpo) {
+  const clave = pedirClaveMantenedor(false);
+  if (!clave) throw new Error('Sin clave no se puede.');
+  const respuesta = await fetch(API + ruta, {
+    method: cuerpo ? 'POST' : 'GET',
+    headers: Object.assign({ authorization: 'Bearer ' + clave }, cuerpo ? { 'content-type': 'application/json' } : {}),
+    body: cuerpo ? JSON.stringify(cuerpo) : undefined,
+    cache: 'no-store'
+  });
+  const datos = await respuesta.json().catch(() => null);
+  if (respuesta.status === 401) { try { localStorage.removeItem(CLAVE_MANT); } catch (e) {} }
+  if (!respuesta.ok) throw Object.assign(new Error((datos && datos.error) || ('HTTP ' + respuesta.status)), { status: respuesta.status });
+  return datos;
+}
+function cerrarAutores() { const p = document.getElementById('panel-autores'); if (p) p.remove(); }
+async function verAutores() {
+  cerrarAutores(); cerrarPanel();
+  let lista;
+  try { lista = await apiMantenedor('autores'); }
+  catch (e) { alert('No se pudo abrir la lista de autores: ' + e.message); return; }
+  const panel = document.createElement('div');
+  panel.id = 'panel-autores';
+  panel.innerHTML = '<button class="cerrar" onclick="cerrarAutores()" title="Cerrar">✕</button>' +
+    '<h3>Enlaces de autor</h3>' +
+    (lista.length ? lista.map(a =>
+      '<div class="fila-autor"><span class="' + (a.activo ? '' : 'nombre-inactivo') + '">' + esc(a.nombre) + '</span>' +
+      '<button onclick="cambiarAutor(' + a.id + ',' + (a.activo ? 'false' : 'true') + ')">' + (a.activo ? 'Desactivar' : 'Activar') + '</button></div>'
+    ).join('') : '<p class="vacio">Todavía no hay autores.</p>') +
+    '<div class="crear"><input id="autor-nuevo" placeholder="Nombre del autor nuevo"><button onclick="crearAutor()">Crear</button></div>' +
+    '<p class="nota">Al crear un autor se genera su enlace una sola vez: cópialo y mándaselo por WhatsApp. Desactivar corta el acceso de inmediato.</p>';
+  document.body.appendChild(panel);
+}
+async function crearAutor() {
+  const nombre = (document.getElementById('autor-nuevo').value || '').trim();
+  if (!nombre) { alert('Escribe el nombre del autor.'); return; }
+  try {
+    const r = await apiMantenedor('autores', { nombre: nombre });
+    const enlace = location.origin + location.pathname + '?a=' + r.token;
+    prompt('Enlace de autor para ' + r.nombre + ' — cópialo ahora, no se vuelve a mostrar:', enlace);
+    verAutores();
+  } catch (e) { alert('No se pudo crear: ' + e.message); }
+}
+async function cambiarAutor(id, activo) {
+  try { await apiMantenedor('autores/estado', { id: id, activo: activo }); verAutores(); }
+  catch (e) { alert('No se pudo cambiar: ' + e.message); }
+}
+document.addEventListener('click', e => {
+  const panel = document.getElementById('panel-autores');
+  if (panel && !panel.contains(e.target) && !e.target.closest('[onclick^="verAutores"]')) cerrarAutores();
+});
+
+/* Un enlace ?a=... trae el código de autor: se guarda y se limpia de la dirección,
+   para que el código no se quede en el historial ni se comparta sin querer. */
+(function () {
+  const parametros = new URLSearchParams(location.search);
+  const codigo = (parametros.get('a') || '').trim();
+  if (!codigo) return;
+  guardarToken(codigo);
+  parametros.delete('a');
+  const resto = parametros.toString();
+  history.replaceState(null, '', location.pathname + (resto ? '?' + resto : '') + location.hash);
+  setTimeout(() => marcarEstado('Código de autor guardado en este dispositivo ✓', true), 300);
+})();
 
 /* ---------- inicio ---------- */
 (async () => {

@@ -1,0 +1,13 @@
+# Configuración del proyecto en Cloudflare Pages.
+# El binding DB conecta la base D1 "programas-tl" con las funciones de /functions/api.
+# La clave del mantenedor NO vive aquí: está como hash en la tabla config de la base
+# (en desarrollo local se puede pasar con --binding CLAVE_MANTENEDOR=...).
+
+name = "programas-tierra-linda"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "programas-tl"
+database_id = "526af821-dc6e-4254-ad64-da3caa3b5daa"

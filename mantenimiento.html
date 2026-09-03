@@ -109,78 +109,88 @@
     </tr>
     <tr>
       <td><b>El programa publicado</b></td>
-      <td><code>programas/AAAA-MM-DD.json</code> en el repositorio</td>
+      <td>La base de datos (D1 <code>programas-tl</code>), una fila por fecha</td>
       <td>Todos los que entren a la página sin enlace y sin copia propia</td>
-      <td>Cuando yo hago commit y push</td>
+      <td>Cuando un autor toca ☁️ Publicar</td>
     </tr>
   </table>
   <div class="regla">El enlace es una foto. Lo publicado es el original.</div>
-  <p>Consecuencia práctica: si Andrés me manda su enlace y después sigue corrigiendo, <b>su enlace
-  no cambia</b>. Tiene que mandarme uno nuevo, o yo publico y quedamos sobre lo publicado.</p>
+  <p>Consecuencia práctica: si Andrés comparte su enlace y después sigue corrigiendo, <b>su enlace
+  no cambia</b>. Lo que sí cambia al instante es lo publicado: corrige y vuelve a publicar.</p>
+  <p>Los JSON de <code>programas/</code> en el repositorio ya no son la fuente: son el
+  <b>respaldo</b> y lo que ve la página si la base llegara a fallar. Vale la pena refrescarlos de
+  vez en cuando (paso a paso abajo).</p>
 
   <h2 id="semana">2. El flujo de una semana</h2>
   <div class="paso"><div class="num">1</div><div>
     <p><b>Jueves o viernes: el de turno arma el programa</b><span class="quien">autor</span></p>
-    <p>Abre <code>programas-tierra-linda.pages.dev</code>. Le sale el programa publicado del sábado
-    anterior, edita fecha, etiquetas del encabezado y espacios. Puede usar
-    <span class="btn claro">🗂️ Programas</span> para partir de otro sábado parecido.</p>
+    <p>Abre <code>programas-tierra-linda.pages.dev</code>. Le sale el programa vigente, edita fecha,
+    etiquetas del encabezado y espacios. Puede usar <span class="btn claro">🗂️ Programas</span>
+    para partir de otro sábado parecido.</p>
   </div></div>
   <div class="paso"><div class="num">2</div><div>
-    <p><b>Me manda el enlace editable</b><span class="quien">autor</span></p>
-    <p>Botón <span class="btn claro">🔗 Enlace editable</span> y me lo pega por WhatsApp. Ese enlace
-    ya trae el programa completo adentro, no necesita mandarme nada más.</p>
+    <p><b>Publica él mismo</b><span class="quien">autor</span></p>
+    <p>Botón <span class="btn claro">☁️ Publicar</span>. La página le pide confirmación y desde ese
+    momento es lo que ve todo el que entre. Su código de autor ya está guardado en su aparato
+    (lo recibió una vez como enlace <code>?a=…</code>). Yo no estoy en el camino.</p>
   </div></div>
   <div class="paso"><div class="num">3</div><div>
-    <p><b>Lo reviso y lo publico</b><span class="quien">yo</span></p>
-    <p>Abro su enlace. Como yo tengo copia propia guardada, la página me pregunta si reemplazo la
-    mía: le digo que sí (mi copia no importa, la oficial es la que voy a publicar). Reviso horas y
-    nombres, y sigo el paso 3 de abajo.</p>
-  </div></div>
-  <div class="paso"><div class="num">4</div><div>
     <p><b>Se reparte</b><span class="quien">autor</span></p>
-    <p>Ya publicado, el de turno manda al grupo el <span class="btn claro">👁️ Enlace de solo
-    lectura</span> o el PDF. El programa queda cerrado y nadie lo cambia sin querer.</p>
+    <p>Manda al grupo el <span class="btn claro">👁️ Enlace de solo lectura</span> o el PDF.
+    El programa queda cerrado y nadie lo cambia sin querer.</p>
   </div></div>
-  <div class="aviso"><b>Por qué este orden:</b> el paso 3 es el que crea la única versión oficial.
-  Si nos saltamos ese paso, lo que circula son fotos sueltas y el sábado aparecen dos programas
-  distintos. Es exactamente el problema que veníamos teniendo con las fotos de WhatsApp.</div>
+  <div class="aviso"><b>Mi papel ahora es otro:</b> ya no publico cada semana; administro los
+  códigos de autor (👥 Autores), reviso de vez en cuando que lo publicado esté bien, y mantengo el
+  respaldo en Git. Si un autor no puede publicar (código perdido, sin internet en el computador de
+  la iglesia), el plan B de siempre sigue funcionando: me manda el enlace editable y publico yo.</div>
 
-  <h2 id="publicar">3. Publicar, paso a paso</h2>
+  <h2 id="publicar">3. Mi parte: autores, respaldo y base</h2>
+  <h3>Crear o revocar un código de autor</h3>
   <ol>
-    <li>Abrir mi enlace de trabajo: <code>programas-tierra-linda.pages.dev/?publicar</code>
-      (si vengo del enlace de otra persona, agregarle <code>?publicar</code> antes del <code>#</code>).</li>
-    <li>Verificar arriba a la derecha el sello <b>⚙️ Modo publicación</b>.</li>
-    <li>Botón <span class="btn claro">⬇️ Publicar JSON</span>. Descarga el archivo con el nombre
-      de la fecha, por ejemplo <code>2026-09-05.json</code>, sacado del campo de fecha del programa.</li>
-    <li>En la terminal:</li>
+    <li>Abrir <code>programas-tierra-linda.pages.dev/?publicar</code> → botón
+      <span class="btn claro">👥 Autores</span>.</li>
+    <li>La primera vez pide la <b>clave de mantenedor</b> (variable <code>CLAVE_MANTENEDOR</code>
+      del proyecto en Cloudflare Pages; queda guardada en mi navegador).</li>
+    <li><b>Crear:</b> nombre y botón Crear. Sale el enlace <code>?a=…</code> <b>una sola vez</b>:
+      copiarlo ahí mismo y mandárselo al autor por WhatsApp. Él lo abre una vez y listo.</li>
+    <li><b>Revocar:</b> botón Desactivar en la fila del autor. Corta el acceso al instante
+      (por ejemplo, un enlace reenviado a quien no era).</li>
   </ol>
+  <h3>Refrescar el respaldo en Git (una vez al mes, o tras un sábado importante)</h3>
 <pre><span class="c"># desde ~/Documents/Iglesia/projects/programas-tierra-linda</span>
+<span class="c"># bajar el vigente publicado: botón "⬇️ Descargar JSON" en ?publicar, y luego</span>
 mv ~/Downloads/2026-09-05.json programas/
 node tools/indexar.js
 git add -A
-git commit -m "Programa del 5 de septiembre"
+git commit -m "Respaldo del programa del 5 de septiembre"
 git push</pre>
-  <p>Cloudflare despliega en menos de un minuto. Verificación de 5 segundos: abrir la página en una
-  ventana privada (sin copia guardada) y confirmar que aparece la fecha nueva.</p>
   <p><b>Nunca editar <code>programas/index.json</code> a mano.</b> Lo genera <code>indexar.js</code>
-  leyendo la carpeta, y el orden por nombre de archivo es lo que define cuál es el vigente.</p>
+  leyendo la carpeta.</p>
+  <h3>Si la base se daña o no responde</h3>
+  <p>La página no se cae: vuelve sola al respaldo del repositorio (por eso vale mantenerlo al día).
+  Diagnóstico en 10 segundos: abrir <code>/api/vigente</code> — un 404 dice "no hay nada publicado",
+  un 503 dice "el binding DB del proyecto está desconfigurado" (revisar <code>wrangler.toml</code>
+  y el panel de Pages). El esquema está en <code>migrations/0001_inicial.sql</code> y se aplica con
+  <code>npx wrangler d1 migrations apply programas-tl --remote</code>.</p>
 
   <h2 id="casos">4. Casos especiales</h2>
 
   <h3>Corregir algo después de publicar</h3>
-  <p>Editar, volver a publicar con la <b>misma fecha</b> (el archivo se sobreescribe),
-  <code>node tools/indexar.js</code>, commit y push. El historial de la corrección queda en Git.</p>
+  <p>Editar y volver a tocar <span class="btn claro">☁️ Publicar</span> con la <b>misma fecha</b>:
+  la fila se sobreescribe. Cualquier autor activo puede corregir; la base guarda quién publicó de
+  último y cuándo.</p>
 
   <h3>Publicar con anticipación</h3>
-  <p>El vigente es el de la <b>fecha más nueva</b>, así que si publico el del 5 de septiembre un
-  lunes, desde ese lunes la gente ve el del 5. Eso es lo que uno quiere para el que está armando el
-  programa, pero conviene saberlo: no muestra "el de hoy", muestra el más adelantado.</p>
+  <p>El vigente es el de la <b>fecha más nueva</b>, así que si alguien publica el del 5 de
+  septiembre un lunes, desde ese lunes la gente ve el del 5. Eso es lo que uno quiere para el que
+  está armando el programa, pero conviene saberlo: no muestra "el de hoy", muestra el más adelantado.</p>
 
   <h3>Revertir una publicación mala</h3>
-<pre>git rm programas/2026-09-05.json
-node tools/indexar.js
-git commit -m "Revertir el programa del 5" &amp;&amp; git push</pre>
-  <p>El vigente vuelve a ser el sábado anterior, que sigue en la carpeta.</p>
+  <p>Si el programa está mal, se corrige y se republica (caso de arriba). Si la fecha entera sobra
+  (se publicó un sábado que no existe y quedó como vigente), se borra la fila directamente:</p>
+<pre>npx wrangler d1 execute programas-tl --remote \
+  --command "DELETE FROM programa WHERE fecha = '2026-09-05'"</pre>
+  <p>El vigente vuelve a ser la fecha anterior. El respaldo del repositorio no se toca.</p>
 
   <h3>Dos personas editando el mismo sábado</h3>
   <p>No hay edición simultánea y no la va a haber sin servidor. La regla: <b>una sola persona arma
@@ -243,10 +253,11 @@ git commit -m "Revertir el programa del 5" &amp;&amp; git push</pre>
   <h2 id="checklist">7. Rutina semanal en una tarjeta</h2>
   <table>
     <tr><th>Cuándo</th><th>Qué</th></tr>
-    <tr><td>Jueves</td><td>Recordarle al de turno que arme el programa en la página y me mande el enlace editable.</td></tr>
-    <tr><td>Viernes a.m.</td><td>Revisar, publicar (4 comandos) y confirmar en ventana privada.</td></tr>
+    <tr><td>Jueves</td><td>Recordarle al de turno que arme el programa y lo publique él mismo (☁️ Publicar). Si es autor nuevo, mandarle antes su enlace de autor desde 👥 Autores.</td></tr>
+    <tr><td>Viernes a.m.</td><td>Abrir la página en ventana privada y confirmar que el vigente es el del sábado que viene.</td></tr>
     <tr><td>Viernes p.m.</td><td>Que el de turno reparta el enlace de solo lectura o el PDF.</td></tr>
-    <tr><td>Cada tanto</td><td>Correr las pruebas antes de tocar el código: <code>node tests/horas.js</code>, <code>node tests/modelo.js</code>.</td></tr>
+    <tr><td>Una vez al mes</td><td>Refrescar el respaldo en Git (Descargar JSON → <code>indexar.js</code> → commit) y revisar la lista de autores activos.</td></tr>
+    <tr><td>Cada tanto</td><td>Correr las pruebas antes de tocar el código: <code>node tests/horas.js</code>, <code>node tests/modelo.js</code>, y las del API (README).</td></tr>
   </table>
   <p style="margin-top:24px"><a href="./?publicar" style="color:var(--verde2)">← Ir a la aplicación en modo publicación</a>
   &nbsp;·&nbsp; <a href="./manual.html" style="color:var(--verde2)">Manual de los autores</a></p>
