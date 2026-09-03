@@ -6,6 +6,34 @@
    SQL, verificación de Origin en escrituras y límite de intentos por IP. */
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
+
+/* ---- arranque de la base ----
+   Las tablas se crean solas la primera vez que el API corre en producción, así el
+   despliegue no depende de aplicar migraciones a mano (migrations/0001_inicial.sql
+   queda como documentación del esquema). El hash inicial de la clave del mantenedor
+   solo se siembra si la fila no existe: cambiar la clave después (UPDATE en config)
+   es definitivo, el código nunca la revierte. Publicar el hash es seguro: la clave
+   es aleatoria de 144 bits y no hay diccionario que la alcance. */
+const HASH_MANTENEDOR_INICIAL = '2de6a4a9b208b44a945ed1e9e2bdcc4a8a0dbe0fef0d17a18c1b6aa29d5e578f';
+let baseLista = false;
+async function prepararBase(db) {
+  if (baseLista) return;
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS programa (
+      fecha TEXT PRIMARY KEY, titulo TEXT NOT NULL DEFAULT '', json TEXT NOT NULL,
+      espacios INTEGER NOT NULL DEFAULT 0, publicado_por TEXT NOT NULL DEFAULT '',
+      actualizado_en TEXT NOT NULL DEFAULT (datetime('now')))`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS autor (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL,
+      token_hash TEXT NOT NULL UNIQUE, activo INTEGER NOT NULL DEFAULT 1,
+      creado_en TEXT NOT NULL DEFAULT (datetime('now')))`),
+    db.prepare('CREATE TABLE IF NOT EXISTS intento (ip TEXT NOT NULL, momento INTEGER NOT NULL)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_intento ON intento (ip, momento)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS config (clave TEXT PRIMARY KEY, valor TEXT NOT NULL)'),
+    db.prepare("INSERT OR IGNORE INTO config (clave, valor) VALUES ('clave_mantenedor_hash', ?1)").bind(HASH_MANTENEDOR_INICIAL)
+  ]);
+  baseLista = true;
+}
 const TOPE_BODY = 200 * 1024;        // un programa sin logos pesa ~6 KB; 200 KB es holgura
 const FALLOS_MAX = 10;               // intentos fallidos por IP...
 const FALLOS_VENTANA = 15 * 60e3;    // ...en 15 minutos
@@ -100,6 +128,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const db = env.DB;
   if (!db) return error('La base de datos no está configurada.', 503);
+  try { await prepararBase(db); } catch (e) { return error('La base no se pudo preparar: ' + e.message, 500); }
   const url = new URL(request.url);
   const ruta = url.pathname.replace(/^\/api\/?/, '').replace(/\/+$/, '');
   const metodo = request.method;

@@ -169,9 +169,13 @@ git push</pre>
   <h3>Si la base se daña o no responde</h3>
   <p>La página no se cae: vuelve sola al respaldo del repositorio (por eso vale mantenerlo al día).
   Diagnóstico en 10 segundos: abrir <code>/api/vigente</code> — un 404 dice "no hay nada publicado",
-  un 503 dice "el binding DB del proyecto está desconfigurado" (revisar <code>wrangler.toml</code>
-  y el panel de Pages). El esquema está en <code>migrations/0001_inicial.sql</code> y se aplica con
-  <code>npx wrangler d1 migrations apply programas-tl --remote</code>.</p>
+  un 503 dice "el binding DB del proyecto está desconfigurado" (revisar <code>wrangler.toml</code>).
+  <b>Las tablas se crean solas</b> la primera vez que el API corre contra una base vacía, así que
+  recrear la base es: crearla (<code>npx wrangler d1 create</code>), poner el id nuevo en
+  <code>wrangler.toml</code> y hacer push. El esquema está documentado en
+  <code>migrations/0001_inicial.sql</code>. Para cambiar la clave de mantenedor:
+  <code>UPDATE config SET valor='&lt;sha256 de la clave nueva&gt;' WHERE clave='clave_mantenedor_hash'</code>
+  vía <code>wrangler d1 execute --remote</code>.</p>
 
   <h2 id="casos">4. Casos especiales</h2>
 
