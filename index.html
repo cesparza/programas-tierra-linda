@@ -266,10 +266,43 @@
     .hoja { margin: 10px auto; }
   }
 
+  /* ---------- hoja de anuncios ----------
+     Es la segunda cara del mismo programa: lo que el anciano de turno lee en voz alta
+     en el momento de anuncios. Vive en el mismo modelo (campo `anuncios`), asi que se
+     publica, se comparte y se imprime con el programa, sin archivo aparte.
+     Letra grande a proposito: se lee desde el celular o desde el papel, de pie. */
+  .anuncios-hoja { display: none; }
+  body.ver-anuncios .hoja.programa { display: none; }
+  body.ver-anuncios .anuncios-hoja { display: flex; }
+  .anuncios-hoja h1 { letter-spacing: 1px; }
+  .lista-anuncios { list-style: none; margin: 6px 0 0; padding: 0; flex: 1; }
+  .anuncio { display: flex; gap: 14px; padding: 11px 0; border-top: 1px solid var(--linea); }
+  .anuncio:first-child { border-top: none; }
+  .anuncio .num { font-family: 'Poppins'; font-weight: 600; font-size: 17px; color: var(--oro);
+    min-width: 26px; line-height: 1.25; }
+  .anuncio .cuerpo { flex: 1; }
+  .anuncio .atit { font-size: 15.5px; font-weight: 700; line-height: 1.3; }
+  .anuncio .adet { font-size: 13.4px; line-height: 1.5; color: var(--tinta); margin-top: 2px; }
+  .anuncio .adet:empty::before { content: 'detalle (opcional)'; color: #c3cfc7; }
+  .anuncios-cierre { margin-top: 10px; padding-top: 9px; border-top: 2px solid var(--oro);
+    font-size: 12.6px; color: var(--gris); font-style: italic; }
+  @media screen {
+    .anuncio .atit { font-size: 17px; }
+    .anuncio .adet { font-size: 15px; }
+    .anuncio .num { font-size: 19px; }
+    .anuncios-cierre { font-size: 14px; color: var(--gris-tenue); }
+    .anuncios-vacio { color: var(--gris-tenue); font-size: 14px; padding: 18px 0; }
+    body.tarjetas .anuncio { flex-direction: row; }
+    body.tarjetas .anuncio .atit { font-size: 16px; }
+    body.tarjetas .anuncio .adet { font-size: 14.5px; }
+  }
+
   @media print {
     body { background: #fff; }
     .hoja { zoom: 1 !important; }
-    .toolbar, .ops, .sbtn, .ajustar, .meta .quitar, .meta .agregar { display: none !important; }
+    .toolbar, .ops, .sbtn, .ajustar, .meta .quitar, .meta .agregar,
+    .anuncio .ops-a, .agregar-anuncio { display: none !important; }
+    .anuncio .adet:empty::before { content: ''; }
     .hoja { margin: 0; box-shadow: none; width: 11in; height: 8.5in; }
     header img:hover { outline: none; }
     [contenteditable]:hover, [contenteditable]:focus { outline: none; background: transparent; }
@@ -280,6 +313,7 @@
 
 <div class="toolbar">
   <button class="primario" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+  <button id="btn-anuncios" onclick="alternarAnuncios()" title="Pasar a la hoja de anuncios, la que se lee en voz alta">📣 Anuncios</button>
   <button class="solo-edicion" onclick="agregarSeccion()">➕ Sección</button>
   <button class="solo-edicion" onclick="copiarEnlace(false)">🔗 Enlace editable</button>
   <button class="solo-edicion" onclick="copiarEnlaceVista()">👁️ Enlace de solo lectura</button>
@@ -300,7 +334,7 @@
   <span class="aviso solo-edicion">Toque cualquier texto y escriba encima. En cada espacio: ↑↓ lo mueven, ➕ agrega otro, 👤 pone o quita el sello, ✕ lo borra. Las flechas verdes mueven la sección completa. Sus cambios quedan guardados solos. Si necesita ayuda, abra el manual.</span>
 </div>
 
-<div class="hoja">
+<div class="hoja programa">
   <header>
     <img class="tl" id="logo-tl" src="logo-tl.png" alt="Iglesia Adventista Tierra Linda" title="Clic para reemplazar el logo">
     <div class="titulo">
@@ -320,6 +354,22 @@
       <div class="autor" contenteditable data-k="autor"></div>
     </div>
   </footer>
+</div>
+
+<div class="hoja anuncios-hoja">
+  <header>
+    <img class="tl" src="logo-tl.png" alt="Iglesia Adventista Tierra Linda">
+    <div class="titulo">
+      <div class="kicker" contenteditable data-k="kicker"></div>
+      <h1 contenteditable data-k="anunciosTitulo"></h1>
+      <div class="fecha" contenteditable data-k="fecha"></div>
+    </div>
+    <img class="sda" src="logo-sda.png" alt="Iglesia Adventista del Séptimo Día">
+  </header>
+  <div class="regla"></div>
+  <ol class="lista-anuncios" id="lista-anuncios"></ol>
+  <button class="agregar agregar-anuncio solo-edicion" onclick="agregarAnuncio()">➕ anuncio</button>
+  <div class="anuncios-cierre" contenteditable data-k="anunciosCierre"></div>
 </div>
 
 <input type="file" id="selector-logo" accept="image/*" style="display:none">
@@ -502,6 +552,9 @@ const ORIGINAL = {
   ],
   "recosTitulo": "Recomendaciones",
   "recos": "<b>1.</b> Ajustémonos al horario establecido y cumplámoslo con amor; por ningún motivo habrá cambios que no estén planeados con anticipación. <b>2.</b> Quienes suben a plataforma: vestuario formal, no joyas, no tennis. <b>3.</b> A los responsables de cada ministerio, recomendar el buen uso del tiempo asignado. <b>4.</b> Anuncios: a Comunicaciones (Joana Salazar) hasta el viernes 4:00 pm, imágenes en 16:9. <b>5.</b> En la tarde: Feria de Talento Infantil, a cargo del Ministerio Infantil. Que todo lo que hagamos sea para la honra y gloria de nuestro Dios.",
+  "anunciosTitulo": "Anuncios",
+  "anuncios": [],
+  "anunciosCierre": "Estemos pendientes de las redes de la iglesia: ahí se informa todo lo de la semana.",
   "cita": "“Dios es un Dios de orden. Todo lo que se relaciona con el cielo está en perfecto orden; la sujeción y perfecta disciplina distinguen los movimientos de la hueste angélica. El éxito solo puede acompañar al orden y a la acción armoniosa.”",
   "autor": "Elena G. de White · Patriarcas y Profetas, p. 391"
 };
@@ -576,7 +629,7 @@ let focoDeseado = null;
 let ultimoFoco = null;
 function anotarFocoDe(el) {
   if (!el || !el.dataset) return null;
-  const atributo = ['f', 'k', 'sec', 'meta', 'metal'].find(a => el.dataset[a] !== undefined);
+  const atributo = ['f', 'a', 'k', 'sec', 'meta', 'metal'].find(a => el.dataset[a] !== undefined);
   if (!atributo) return null;
   const seleccion = window.getSelection();
   const dentro = seleccion && seleccion.focusNode && el.contains(seleccion.focusNode);
@@ -703,7 +756,11 @@ function normalizar(m) {
     }))
     .filter(s => s.filas.length);
   if (!o.secciones.length) o.secciones = base.secciones;
-  ['kicker','titulo','fecha','recosTitulo','recos','cita','autor'].forEach(k => {
+  /* los anuncios son opcionales: un programa viejo o un enlace de antes no los trae */
+  if (!Array.isArray(o.anuncios)) o.anuncios = [];
+  o.anuncios = o.anuncios.filter(a => a && typeof a === 'object')
+    .map(a => ({ tit: String(a.tit || ''), det: String(a.det || '') }));
+  ['kicker','titulo','fecha','recosTitulo','recos','cita','autor','anunciosTitulo','anunciosCierre'].forEach(k => {
     if (typeof o[k] !== 'string') o[k] = base[k];
   });
   return o;
@@ -860,6 +917,7 @@ function render() {
       tb.appendChild(tr);
     });
   });
+  renderAnuncios();
   /* Sin foco que devolver se restaura el desplazamiento. Con foco, se deja la fila a la
      vista con scrollIntoView 'nearest': en el celular el navegador arrastra la pagina al
      poner el cursor y pelearse con el termina peor, asi que la fila que se movio queda
@@ -873,6 +931,68 @@ function render() {
   requestAnimationFrame(fijar);
 }
 
+/* ---------- hoja de anuncios ----------
+   Los anuncios son parte del mismo programa (campo `anuncios` del modelo), no un archivo
+   aparte: asi se publican, se comparten y se guardan con el, y el anciano de turno abre
+   una sola direccion el sabado. Lo que cambia es la hoja que se ve y, por lo tanto, la
+   que se imprime: el boton de imprimir siempre saca lo que hay en pantalla. */
+function renderAnuncios() {
+  const lista = document.getElementById('lista-anuncios');
+  if (!lista) return;
+  if (!modelo.anuncios.length) {
+    lista.innerHTML = SOLO_LECTURA
+      ? '<li class="anuncios-vacio">Este sábado no hay anuncios.</li>'
+      : '<li class="anuncios-vacio">Todavía no hay anuncios. Toque ➕ anuncio para agregar el primero.</li>';
+    return;
+  }
+  lista.innerHTML = modelo.anuncios.map((a, i) => `
+    <li class="anuncio">
+      <span class="num">${i + 1}.</span>
+      <div class="cuerpo">
+        <div class="atit" ${editable} data-a="${i}.tit">${esc(a.tit)}</div>
+        <div class="adet" ${editable} data-a="${i}.det">${esc(a.det)}</div>
+      </div>
+      <span class="ops ops-a">
+        <button title="Subir este anuncio" onclick="moverAnuncio(${i},-1)">↑</button>
+        <button title="Bajar este anuncio" onclick="moverAnuncio(${i},1)">↓</button>
+        <button title="Agregar anuncio debajo" onclick="agregarAnuncio(${i})">➕</button>
+        <button title="Quitar este anuncio" onclick="quitarAnuncio(${i})">✕</button>
+      </span>
+    </li>`).join('');
+}
+function alternarAnuncios() {
+  const enAnuncios = document.body.classList.toggle('ver-anuncios');
+  const boton = document.getElementById('btn-anuncios');
+  if (boton) {
+    boton.textContent = enAnuncios ? '📋 Programa' : '📣 Anuncios';
+    boton.title = enAnuncios ? 'Volver al programa' : 'Pasar a la hoja de anuncios, la que se lee en voz alta';
+  }
+  aplicarVista();
+  window.scrollTo({ top: 0 });
+  marcarEstado(enAnuncios ? 'Hoja de anuncios · el botón de imprimir saca esta hoja' : '');
+}
+function agregarAnuncio(i) {
+  anotarHistorial();
+  const donde = (i === undefined) ? modelo.anuncios.length : i + 1;
+  modelo.anuncios.splice(donde, 0, { tit: 'Nuevo anuncio', det: '' });
+  focoDeseado = { atributo: 'a', clave: donde + '.tit', posicion: 0 };
+  render(); guardar();
+}
+function quitarAnuncio(i) {
+  anotarHistorial();
+  modelo.anuncios.splice(i, 1);
+  render(); guardar();
+}
+function moverAnuncio(i, paso) {
+  const destino = i + paso;
+  if (destino < 0 || destino >= modelo.anuncios.length) return;
+  anotarHistorial();
+  const [a] = modelo.anuncios.splice(i, 1);
+  modelo.anuncios.splice(destino, 0, a);
+  focoDeseado = { atributo: 'a', clave: destino + '.tit', posicion: 0 };
+  render(); guardar();
+}
+
 /* ---------- lectura del DOM al modelo ---------- */
 function leerDOM() {
   document.querySelectorAll('[data-k]').forEach(el => {
@@ -882,6 +1002,10 @@ function leerDOM() {
   document.querySelectorAll('[data-metal]').forEach(el => modelo.meta[+el.dataset.metal][0] = el.textContent.trim());
   document.querySelectorAll('[data-meta]').forEach(el => modelo.meta[+el.dataset.meta][1] = el.textContent.trim());
   document.querySelectorAll('[data-sec]').forEach(el => modelo.secciones[+el.dataset.sec].nombre = el.textContent.trim());
+  document.querySelectorAll('[data-a]').forEach(el => {
+    const [i, campo] = el.dataset.a.split('.');
+    if (modelo.anuncios[+i]) modelo.anuncios[+i][campo] = el.textContent.trim();
+  });
   document.querySelectorAll('[data-f]').forEach(el => {
     const [si, fi, campo] = el.dataset.f.split('.');
     modelo.secciones[+si].filas[+fi][campo] = el.textContent.trim();

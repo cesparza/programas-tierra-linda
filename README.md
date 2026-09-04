@@ -48,6 +48,7 @@ base, la página funciona igual que la versión estática.
 | `tests/api.js` | 22 casos del API: publicar, autores, futuros, rechazos, revocación y límite de intentos. |
 | `tests/publicar.js` | El flujo de publicar desde la página, con navegador real. |
 | `tests/horario.js` | La corrección del horario en cascada (⤓): duraciones conservadas, filas ilegibles, deshacer. |
+| `tests/anuncios.js` | La hoja de anuncios: edición, orden, impresión por hoja, enlace y compatibilidad. |
 | `tools/indexar.js` | Regenera `programas/index.json`. |
 | `tools/capturas.js` | Vuelve a tomar las imágenes del manual desde la aplicación real. |
 | `tools/optimizar-capturas.py` | Reduce el peso de esas imágenes. |
@@ -152,6 +153,11 @@ Es el mismo objeto en los tres lugares: el JSON publicado, el `localStorage` y e
       ]
     }
   ],
+  "anunciosTitulo": "Anuncios",       // encabezado de la hoja de anuncios
+  "anuncios": [                       // lo que el anciano de turno lee en voz alta
+    { "tit": "Semana de evangelismo", "det": "Del 13 al 18, 7:00 pm, por Zoom" }
+  ],
+  "anunciosCierre": "Estemos pendientes de las redes…",
   "recosTitulo": "Recomendaciones",
   "recos": "<b>1.</b> …",         // único campo con HTML, filtrado a b/i/strong/em/br/u
   "cita": "“Dios es un Dios de orden…”",
@@ -184,6 +190,7 @@ node tests/modelo.js
 python3 -m http.server 8787      # en otra terminal, desde la raíz
 node tests/vistas.js
 node tests/horario.js
+node tests/anuncios.js
 ```
 
 Las del API y el flujo de publicar necesitan el servidor local con base:
