@@ -79,6 +79,14 @@
   .hora { width: 108px; white-space: nowrap; }
   .rango { font-family: 'Poppins'; font-weight: 500; font-size: 11px; color: var(--verde2); }
   .mins { font-size: 8.8px; color: var(--gris); letter-spacing: 0.5px; }
+  /* boton de corregir el horario en cascada: solo existe en pantalla */
+  .ajustar { display: none; }
+  @media screen {
+    .ajustar { display: inline-block; border: none; background: none; color: #b3c0b6;
+      font-size: 10px; padding: 2px 0 0; cursor: pointer; letter-spacing: .3px; }
+    .ajustar:hover { color: var(--verde); text-decoration: underline; }
+    body.tarjetas .ajustar { font-size: 12.5px; padding: 6px 0; }
+  }
   .espacio .tit { font-size: 12.2px; font-weight: 700; }
   .espacio .sub { font-size: 10.2px; color: var(--gris); margin-top: 1px; }
   .espacio .sub:empty::before, .dirige .rol:empty::before { content: 'detalle (opcional)'; color: #c3cfc7; }
@@ -261,7 +269,7 @@
   @media print {
     body { background: #fff; }
     .hoja { zoom: 1 !important; }
-    .toolbar, .ops, .sbtn, .meta .quitar, .meta .agregar { display: none !important; }
+    .toolbar, .ops, .sbtn, .ajustar, .meta .quitar, .meta .agregar { display: none !important; }
     .hoja { margin: 0; box-shadow: none; width: 11in; height: 8.5in; }
     header img:hover { outline: none; }
     [contenteditable]:hover, [contenteditable]:focus { outline: none; background: transparent; }
@@ -739,7 +747,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) guard
    Lee un rango tipo "9:05 - 9:20" y devuelve "15 min". Las horas de los programas
    van en formato de 12 horas sin am/pm, asi que si el fin queda antes del inicio
    se asume que cruzo el mediodia (11:35 - 12:20) o la tarde (12:20 - 1:05). */
-function calcularMins(rango) {
+function parsearRango(rango) {
   const hora = '(\\d{1,2}):(\\d{2})\\s*(a\\.?m\\.?|p\\.?m\\.?)?';
   const p = String(rango).match(new RegExp(hora + '\\s*(?:[\u2013\\-\u2014]|a|hasta)\\s*' + hora, 'i'));
   if (!p) return null;
@@ -760,7 +768,46 @@ function calcularMins(rango) {
   if (fin < inicio && !(p[3] && p[6])) fin += 12 * 60;
   const total = fin - inicio;
   if (total <= 0 || total > 12 * 60) return null;
-  return total + ' min';
+  return { ini: inicio, fin: fin, dur: total };
+}
+function calcularMins(rango) {
+  const r = parsearRango(rango);
+  return r ? r.dur + ' min' : null;
+}
+/* Minutos absolutos -> "H:MM" en el estilo del programa: 12 horas sin am/pm. */
+function formatearRango(ini, fin) {
+  const f = m => {
+    m = ((m % (24 * 60)) + 24 * 60) % (24 * 60);
+    const h = Math.floor(m / 60);
+    return ((h % 12) || 12) + ':' + String(m % 60).padStart(2, '0');
+  };
+  return f(ini) + ' \u2013 ' + f(fin);
+}
+/* Corrige el horario en cascada a partir de un espacio: cada espacio siguiente
+   arranca donde termina el anterior y conserva su propia duración. Es una acción
+   explícita (el botón ⤓ bajo los minutos), nunca automática: editar una hora suelta
+   no debe reescribir el resto del programa. Los espacios con hora ilegible se
+   saltan sin tocarlos, y Deshacer devuelve todo. */
+function ajustarHorasDesde(si, fi) {
+  leerDOM();
+  const base = parsearRango(modelo.secciones[si].filas[fi].hora);
+  if (!base) { marcarEstado('Primero escribe un rango válido en este espacio, por ejemplo 9:00 – 9:05', true); return; }
+  const planas = [];
+  modelo.secciones.forEach(sec => sec.filas.forEach(f => planas.push(f)));
+  const desde = modelo.secciones.slice(0, si).reduce((n, s) => n + s.filas.length, 0) + fi;
+  anotarHistorial();
+  let cursor = base.fin, tocadas = 0;
+  for (let k = desde + 1; k < planas.length; k++) {
+    const r = parsearRango(planas[k].hora);
+    if (!r) continue;
+    planas[k].hora = formatearRango(cursor, cursor + r.dur);
+    cursor += r.dur;
+    tocadas++;
+  }
+  render(); guardarYa();
+  marcarEstado(tocadas
+    ? 'Horario corregido: ' + tocadas + (tocadas === 1 ? ' espacio ajustado' : ' espacios ajustados') + ' (↶ Deshacer lo devuelve)'
+    : 'No hay espacios siguientes con horas para ajustar', true);
 }
 
 
@@ -796,7 +843,8 @@ function render() {
       }
       tr.innerHTML += `
         <td class="hora"><div class="rango" ${editable} data-f="${si}.${fi}.hora">${esc(f.hora)}</div>
-          <div class="mins" data-f="${si}.${fi}.mins" title="Se calcula del rango de horas">${esc(calcularMins(f.hora) || '')}</div></td>
+          <div class="mins" data-f="${si}.${fi}.mins" title="Se calcula del rango de horas">${esc(calcularMins(f.hora) || '')}</div>
+          <button class="ajustar solo-edicion" title="Corregir las horas de los espacios siguientes: cada uno arranca donde termina este y conserva su duración" onclick="ajustarHorasDesde(${si},${fi})">⤓ ajustar siguientes</button></td>
         <td class="espacio"><div class="tit" ${editable} data-f="${si}.${fi}.tit">${esc(f.tit)}</div>
           <div class="sub" ${editable} data-f="${si}.${fi}.sub">${esc(f.sub)}</div></td>
         <td class="dirige"><div class="nom" ${editable} data-f="${si}.${fi}.nom">${esc(f.nom)}</div>
@@ -963,7 +1011,7 @@ async function descargarHTML() {
   const doc = document.documentElement.cloneNode(true);
   /* la copia es para leer, archivar e imprimir: sin barra, sin botones y sin campos
      editables, porque el JavaScript no viaja con ella */
-  doc.querySelectorAll('script, .toolbar, .ops, .sbtn, .meta .quitar, .meta .agregar').forEach(n => n.remove());
+  doc.querySelectorAll('script, .toolbar, .ops, .sbtn, .ajustar, .meta .quitar, .meta .agregar').forEach(n => n.remove());
   doc.querySelectorAll('[contenteditable]').forEach(n => n.removeAttribute('contenteditable'));
   const hojaCopia = doc.querySelector('.hoja');
   if (hojaCopia) hojaCopia.style.zoom = '';

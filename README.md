@@ -45,8 +45,9 @@ base, la página funciona igual que la versión estática.
 | `tests/horas.js` | 19 casos del cálculo de duración. |
 | `tests/modelo.js` | Serialización, estados dañados y filtrado de HTML. |
 | `tests/vistas.js` | Tarjetas y hoja en cuatro pantallas, más impresión. Necesita servidor local. |
-| `tests/api.js` | 18 casos del API: publicar, autores, rechazos, revocación y límite de intentos. |
+| `tests/api.js` | 22 casos del API: publicar, autores, futuros, rechazos, revocación y límite de intentos. |
 | `tests/publicar.js` | El flujo de publicar desde la página, con navegador real. |
+| `tests/horario.js` | La corrección del horario en cascada (⤓): duraciones conservadas, filas ilegibles, deshacer. |
 | `tools/indexar.js` | Regenera `programas/index.json`. |
 | `tools/capturas.js` | Vuelve a tomar las imágenes del manual desde la aplicación real. |
 | `tools/optimizar-capturas.py` | Reduce el peso de esas imágenes. |
@@ -182,6 +183,7 @@ node tests/horas.js
 node tests/modelo.js
 python3 -m http.server 8787      # en otra terminal, desde la raíz
 node tests/vistas.js
+node tests/horario.js
 ```
 
 Las del API y el flujo de publicar necesitan el servidor local con base:
