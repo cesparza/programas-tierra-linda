@@ -46,8 +46,11 @@ function ok(nombre, condicion, detalle) {
     document.querySelector('[data-k="titulo"]').dispatchEvent(new Event('input', { bubbles: true }));
   }, marca);
   await pagina.waitForTimeout(700);
-  pagina.on('dialog', d => d.accept());
   await pagina.click('#btn-publicar');
+  await pagina.waitForSelector('#panel-publicar');
+  const confirmacion = await pagina.textContent('#panel-publicar .texto');
+  ok('el panel propio confirma la fecha (sin diálogos del navegador)', /Va a publicar/.test(confirmacion || ''), confirmacion);
+  await pagina.click('#panel-publicar .principal');
   await pagina.waitForTimeout(1500);
   const estado = await pagina.textContent('#estado');
   ok('la página confirma la publicación', /Publicado ✓/.test(estado || ''), 'estado: ' + estado);
@@ -57,6 +60,20 @@ function ok(nombre, condicion, detalle) {
     const lista = await (await fetch(BASE + '/api/programas')).json();
     return true; /* publicado_por no se expone en la lista pública; verificado en tests/api.js */
   })()));
+
+  console.log('Sin código guardado, el panel pide el código:');
+  const limpia = await navegador.newPage();
+  await limpia.goto(BASE + '/');
+  await limpia.waitForTimeout(900);
+  await limpia.click('#btn-publicar');
+  await limpia.waitForSelector('#panel-publicar #campo-token');
+  ok('aparece el campo para pegar el código', await limpia.isVisible('#campo-token'));
+  await limpia.fill('#campo-token', token);
+  await limpia.click('#panel-publicar .principal');
+  await limpia.waitForSelector('#panel-publicar .acciones');
+  const paso2 = await limpia.textContent('#panel-publicar .texto');
+  ok('con el código pegado pasa a la confirmación', /Va a publicar/.test(paso2 || ''), paso2);
+  await limpia.close();
 
   console.log('El lector no ve el botón de publicar:');
   const lectora = await navegador.newPage();
