@@ -80,15 +80,45 @@
 
   <div class="indice">
     <ul style="list-style:none;margin-left:0">
+      <li><a href="#maquina">0. Cómo funciona, en una página</a></li>
       <li><a href="#versiones">1. Las tres versiones que existen</a></li>
       <li><a href="#semana">2. El flujo de una semana</a></li>
-      <li><a href="#publicar">3. Publicar, paso a paso</a></li>
+      <li><a href="#publicar">3. Mi parte: autores, respaldo y base</a></li>
       <li><a href="#casos">4. Casos especiales</a></li>
       <li><a href="#demo">5. Guion de la demo, 6 minutos</a></li>
-      <li><a href="#andres">6. Qué pedirle a Andrés esta vez</a></li>
+      <li><a href="#andres">6. Dar de alta a un anciano nuevo</a></li>
       <li><a href="#checklist">7. Rutina semanal en una tarjeta</a></li>
     </ul>
   </div>
+
+  <h2 id="maquina">0. Cómo funciona, en una página</h2>
+  <p>Tres piezas, y cada una responde una pregunta distinta.</p>
+  <table>
+    <tr><th>Pieza</th><th>Qué es</th><th>Qué resuelve</th></tr>
+    <tr><td><b>La página</b><br><code>index.html</code></td>
+      <td>Un solo archivo con todo: el diseño, la edición y la impresión. Cloudflare la sirve como un archivo cualquiera.</td>
+      <td>Que cualquiera edite sin instalar nada ni crear cuenta.</td></tr>
+    <tr><td><b>El API</b><br><code>functions/api/</code></td>
+      <td>Un archivo de JavaScript que corre en el servidor de Cloudflare solo cuando alguien llama <code>/api/…</code>.</td>
+      <td>Guardar y leer programas compartidos. Es la única pieza con llave.</td></tr>
+    <tr><td><b>La base</b><br>D1 <code>programas-tl</code></td>
+      <td>Una base SQLite en mi cuenta de Cloudflare. Una fila por fecha, más la tabla de autores.</td>
+      <td>Que el programa publicado exista en un solo lugar y no en fotos de WhatsApp.</td></tr>
+  </table>
+  <p><b>Qué pasa cuando un autor toca ☁️ Publicar:</b> la página manda su programa y su código al
+  API; el API comprueba el código contra la tabla de autores, deriva la fecha del texto
+  ("Sábado 5 de septiembre de 2026" → <code>2026-09-05</code>) y guarda esa fila. Desde ese
+  momento, cualquiera que abra la página sin copia propia ve ese programa.</p>
+  <p><b>Qué ve cada persona al abrir la página</b>, en este orden y con la primera que aplique:</p>
+  <ol>
+    <li>El programa que venga en el <b>enlace</b> que le compartieron (<code>#…</code>).</li>
+    <li><b>Su propia copia</b>, si estaba editando en ese equipo. Por eso lo publicado nunca le pisa
+      el trabajo a nadie, y por eso yo veo mi borrador mientras los demás ven lo publicado.</li>
+    <li><b>El vigente de la base:</b> el sábado más próximo que aún no pasa. Puedo dejar el 5, el 12
+      y el 19 publicados y cada uno se estrena solo a medianoche del anterior.</li>
+    <li>El respaldo del repositorio y, en último caso, el ejemplo interno: la página nunca abre vacía.</li>
+  </ol>
+  <div class="regla">Nadie instala nada. Nadie inicia sesión. El código de autor es la única llave.</div>
 
   <h2 id="versiones">1. Las tres versiones que existen</h2>
   <p>Casi todos los enredos que puedan pasar salen de confundir estas tres cosas. Son distintas
@@ -221,39 +251,47 @@ git push</pre>
       <td>"Esto es el programa del sábado, en el mismo formato que ya usamos. No hay que instalar nada ni crear cuenta."</td></tr>
     <tr><td><b>0:45</b></td><td>Clic sobre un nombre y lo cambio</td>
       <td>"Se escribe encima, así de simple. Aquí no hay campos ni formularios."</td></tr>
-    <tr><td><b>1:30</b></td><td>Cambio una hora y señalo los minutos</td>
+    <tr><td><b>1:15</b></td><td>Cambio una hora y señalo los minutos</td>
       <td>"Los minutos se calculan solos. Nadie tiene que sumar."</td></tr>
-    <tr><td><b>2:15</b></td><td>Muevo un espacio con ↑ y lo devuelvo con Deshacer</td>
+    <tr><td><b>1:45</b></td><td>Pongo el programa media hora más temprano y toco <b>⤓ ajustar siguientes</b></td>
+      <td>"Y si algo se mueve, todo el horario se corrige de una: cada espacio arranca donde termina el anterior y sigue durando lo mismo."</td></tr>
+    <tr><td><b>2:30</b></td><td>Muevo un espacio con ↑ y lo devuelvo con Deshacer</td>
       <td>"Se puede reordenar, y si uno se equivoca, se deshace."</td></tr>
     <tr><td><b>3:00</b></td><td>Imprimir / Guardar PDF</td>
       <td>"Y de aquí sale el PDF de siempre, en una hoja, para el grupo."</td></tr>
-    <tr><td><b>4:00</b></td><td>Los dos enlaces, abriendo el de solo lectura</td>
-      <td>"Dos formas de compartir: uno para trabajar entre nosotros, y este de solo lectura para cuando ya está cerrado, que nadie puede cambiar."</td></tr>
-    <tr><td><b>5:00</b></td><td>El teléfono, en vista de tarjetas</td>
+    <tr><td><b>3:45</b></td><td>☁️ Publicar y la confirmación con la fecha</td>
+      <td>"Cuando está listo, un botón: desde ahí es el programa que ve todo el que entre a la página. No hay que mandármelo a mí."</td></tr>
+    <tr><td><b>4:30</b></td><td>El enlace de solo lectura</td>
+      <td>"Y para el grupo, este enlace de solo lectura: se ve e imprime, pero nadie lo cambia sin querer."</td></tr>
+    <tr><td><b>5:10</b></td><td>El teléfono, en vista de tarjetas</td>
       <td>"Y se puede hacer desde el celular, con letra grande."</td></tr>
-    <tr><td><b>5:30</b></td><td>El manual</td>
+    <tr><td><b>5:40</b></td><td>El manual</td>
       <td>"Todo esto está explicado en el manual, con el enlace en la misma página."</td></tr>
   </table>
-  <div class="aviso"><b>Lo que no muestro en la demo:</b> el modo publicación, el JSON, el
-  repositorio, ni la palabra Git. Eso es mío. Si alguien pregunta cómo queda "el oficial", la
-  respuesta corta es "yo lo publico y a todos les aparece al entrar".</div>
+  <div class="aviso"><b>Lo que no muestro en la demo:</b> el panel de autores, el JSON, la base de
+  datos, el repositorio, ni la palabra Git. Eso es mío. Lo del código de autor se dice en una frase:
+  "te mando un enlace una vez, lo abres y ya puedes publicar desde tu equipo".</div>
   <p><b>Antes de la demo, dos minutos de alistamiento:</b> entrar en una ventana privada para que
   cargue el programa publicado y no mi copia de pruebas, tener el celular con la página abierta, y
   tener listo el enlace de solo lectura para pegarlo en el grupo en vivo.</p>
 
-  <h2 id="andres">6. Qué pedirle a Andrés esta vez</h2>
-  <p>Andrés está de turno el sábado 22 y es el que va a estrenar esto. Lo que necesito de él es
-  concreto y en este orden:</p>
+  <h2 id="andres">6. Dar de alta a un anciano nuevo</h2>
+  <p>Cada anciano que vaya a armar programas necesita su código de autor. Es una vez en la vida,
+  no una vez por sábado:</p>
   <ol>
-    <li><b>Que arme el programa del 22 en la página</b>, partiendo de lo que ya está cargado (que es
-      justo su programa, el que él preparó). Solo tiene que revisar y ajustar lo que cambie.</li>
-    <li><b>Que me mande el enlace editable</b> cuando lo tenga listo, para publicarlo yo.</li>
-    <li><b>Que reparta el enlace de solo lectura o el PDF</b> al grupo, no el editable.</li>
-    <li><b>Que me diga qué le estorbó.</b> Esto es lo que más me sirve: es el primero que lo usa de
-      verdad y con turno encima.</li>
+    <li><b>Creo su código</b> en <code>?publicar</code> → <span class="btn claro">👥 Autores</span>,
+      con su nombre, y copio el enlace <code>?a=…</code> que sale (se muestra una sola vez).</li>
+    <li><b>Le mando ese enlace por WhatsApp</b> con una frase: "ábrelo una vez en el computador o
+      celular donde armas el programa y ya puedes publicar desde ahí". Nada más; no es una clave que
+      tenga que recordar ni escribir.</li>
+    <li><b>Le paso el manual</b> (📖 en la barra) y le digo las tres cosas que sí importan:
+      escribe encima, ⤓ corrige el horario completo, ☁️ Publicar lo deja como el que todos ven.</li>
+    <li><b>Le pido una sola cosa de vuelta:</b> que me diga qué le estorbó la primera vez. Eso es
+      lo que mejora la herramienta; el resto lo sostengo yo.</li>
   </ol>
-  <p>Y lo que yo le doy, para que quede claro el intercambio: el programa ya cargado, el manual, y
-  yo publico y sostengo la herramienta. Él no tiene que aprender nada técnico.</p>
+  <p>Si el enlace se le pierde o cambia de equipo, no hay recuperación del código: creo uno nuevo y
+  <b>desactivo el viejo</b> en la misma pantalla. Y si un enlace se reenvía a quien no era,
+  desactivarlo corta el acceso al instante.</p>
 
   <h2 id="checklist">7. Rutina semanal en una tarjeta</h2>
   <table>
