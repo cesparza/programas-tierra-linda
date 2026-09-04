@@ -69,6 +69,14 @@ async function recortar(pagina, selector, nombre, margen = 14) {
   await p.click('#btn-historico');
   await p.waitForTimeout(400);
   await recortar(p, '#panel-programas', '11-historico.png', 8);
+  await p.click('#panel-programas .cerrar');
+
+  // panel de publicar (con un código de ejemplo guardado, para mostrar la confirmación)
+  await p.evaluate(() => localStorage.setItem('programa-autor-token', 'codigo-de-ejemplo'));
+  await p.click('#btn-publicar');
+  await p.waitForTimeout(300);
+  await recortar(p, '#panel-publicar', '12-publicar.png', 8);
+  await p.evaluate(() => { cerrarPublicar(); localStorage.removeItem('programa-autor-token'); });
 
   // ---------- celular ----------
   const telefono = await navegador.newContext({ ...devices['iPhone 13'], deviceScaleFactor: 2 });
