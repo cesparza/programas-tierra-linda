@@ -30,7 +30,19 @@ async function prepararBase(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS intento (ip TEXT NOT NULL, momento INTEGER NOT NULL)'),
     db.prepare('CREATE INDEX IF NOT EXISTS idx_intento ON intento (ip, momento)'),
     db.prepare('CREATE TABLE IF NOT EXISTS config (clave TEXT PRIMARY KEY, valor TEXT NOT NULL)'),
-    db.prepare("INSERT OR IGNORE INTO config (clave, valor) VALUES ('clave_mantenedor_hash', ?1)").bind(HASH_MANTENEDOR_INICIAL)
+    db.prepare("INSERT OR IGNORE INTO config (clave, valor) VALUES ('clave_mantenedor_hash', ?1)").bind(HASH_MANTENEDOR_INICIAL),
+    /* Una fecha puede tener más de un programa: el culto del sábado en la mañana y la
+       Sociedad de Jóvenes de esa tarde son dos cosas distintas. Por eso la llave es
+       fecha + tipo, no la fecha sola. `programa` (una fila por fecha) se queda como
+       estaba y sus filas se copian aquí una sola vez: es el respaldo de la migración. */
+    db.prepare(`CREATE TABLE IF NOT EXISTS publicacion (
+      clave TEXT PRIMARY KEY, fecha TEXT NOT NULL, tipo TEXT NOT NULL DEFAULT '',
+      titulo TEXT NOT NULL DEFAULT '', json TEXT NOT NULL,
+      espacios INTEGER NOT NULL DEFAULT 0, publicado_por TEXT NOT NULL DEFAULT '',
+      actualizado_en TEXT NOT NULL DEFAULT (datetime('now')))`),
+    db.prepare('CREATE INDEX IF NOT EXISTS idx_publicacion_fecha ON publicacion (fecha)'),
+    db.prepare(`INSERT OR IGNORE INTO publicacion (clave, fecha, tipo, titulo, json, espacios, publicado_por, actualizado_en)
+      SELECT fecha, fecha, '', titulo, json, espacios, publicado_por, actualizado_en FROM programa`)
   ]);
   baseLista = true;
 }
@@ -51,6 +63,24 @@ function claveDeFecha(fecha) {
   const mes = MESES.findIndex(m => t.includes(m)) + 1;
   if (!dia || !anio || !mes) return null;
   return anio + '-' + String(mes).padStart(2, '0') + '-' + String(dia).padStart(2, '0');
+}
+
+/* El tipo es texto libre del autor ("Sociedad de Jóvenes", "Culto del miércoles").
+   Vacío = el programa principal de esa fecha, el que abre por defecto.
+   Del tipo sale un sufijo legible para la llave y para la dirección de lectura. */
+const TIPO_MAX = 40;
+function limpiarTipo(tipo) {
+  return String(tipo || '').replace(/\s+/g, ' ').trim().slice(0, TIPO_MAX);
+}
+function sufijoDeTipo(tipo) {
+  const base = limpiarTipo(tipo).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')   /* fuera las tildes */
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return base;
+}
+function claveDe(fecha, tipo) {
+  const sufijo = sufijoDeTipo(tipo);
+  return sufijo ? fecha + '-' + sufijo : fecha;
 }
 
 async function sha256hex(texto) {
@@ -121,7 +151,9 @@ function prepararPrograma(p) {
   if (!fecha) return { error: 'La fecha del programa no se entiende. Debe decir día, mes y año, por ejemplo "Sábado 19 de septiembre de 2026".' };
   if (!Array.isArray(copia.secciones) || !copia.secciones.length) return { error: 'El programa no tiene secciones.' };
   const espacios = copia.secciones.reduce((n, s) => n + ((s && Array.isArray(s.filas)) ? s.filas.length : 0), 0);
-  return { fecha, espacios, titulo: String(copia.titulo || ''), json: JSON.stringify(copia) };
+  const tipo = limpiarTipo(copia.tipo);
+  copia.tipo = tipo;
+  return { fecha, tipo, clave: claveDe(fecha, tipo), espacios, titulo: String(copia.titulo || ''), json: JSON.stringify(copia) };
 }
 
 export async function onRequest(context) {
@@ -139,21 +171,28 @@ export async function onRequest(context) {
       /* El vigente es el del sábado que viene, no el último publicado: la fecha más
          próxima que aún no pasa (día de Colombia, UTC-5). Así se pueden dejar
          publicados varios sábados futuros y cada uno se estrena solo, a medianoche
-         del anterior. Si no hay ninguno por venir, se muestra el más reciente. */
+         del anterior. Si no hay ninguno por venir, se muestra el más reciente.
+         Cuando una fecha tiene varios programas (el culto y la Sociedad de Jóvenes,
+         por ejemplo), abre el principal: el que se publicó sin tipo. */
       const hoy = new Date(Date.now() - 5 * 3600e3).toISOString().slice(0, 10);
-      let fila = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en, json FROM programa WHERE fecha >= ?1 ORDER BY fecha ASC LIMIT 1').bind(hoy).first();
-      if (!fila) fila = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en, json FROM programa ORDER BY fecha DESC LIMIT 1').first();
+      const campos = 'clave, fecha, tipo, titulo, espacios, actualizado_en, json';
+      let fila = await db.prepare(`SELECT ${campos} FROM publicacion WHERE fecha >= ?1
+        ORDER BY fecha ASC, (tipo <> '') ASC, actualizado_en ASC LIMIT 1`).bind(hoy).first();
+      if (!fila) fila = await db.prepare(`SELECT ${campos} FROM publicacion
+        ORDER BY fecha DESC, (tipo <> '') ASC, actualizado_en ASC LIMIT 1`).first();
       if (!fila) return error('Todavía no hay programas publicados.', 404);
-      return responder({ fecha: fila.fecha, titulo: fila.titulo, espacios: fila.espacios, actualizado_en: fila.actualizado_en, programa: JSON.parse(fila.json) });
+      return responder({ clave: fila.clave, fecha: fila.fecha, tipo: fila.tipo, titulo: fila.titulo,
+        espacios: fila.espacios, actualizado_en: fila.actualizado_en, programa: JSON.parse(fila.json) });
     }
     if (metodo === 'GET' && ruta === 'programas') {
-      const filas = await db.prepare('SELECT fecha, titulo, espacios, actualizado_en FROM programa ORDER BY fecha DESC LIMIT 200').all();
+      const filas = await db.prepare(`SELECT clave, fecha, tipo, titulo, espacios, actualizado_en
+        FROM publicacion ORDER BY fecha DESC, (tipo <> '') ASC, actualizado_en ASC LIMIT 200`).all();
       return responder(filas.results || []);
     }
-    if (metodo === 'GET' && /^programa\/\d{4}-\d{2}-\d{2}$/.test(ruta)) {
-      const fecha = ruta.split('/')[1];
-      const fila = await db.prepare('SELECT json FROM programa WHERE fecha = ?1').bind(fecha).first();
-      if (!fila) return error('No hay programa para esa fecha.', 404);
+    if (metodo === 'GET' && /^programa\/\d{4}-\d{2}-\d{2}(-[a-z0-9-]{1,60})?$/.test(ruta)) {
+      const clave = ruta.split('/')[1];
+      const fila = await db.prepare('SELECT json FROM publicacion WHERE clave = ?1').bind(clave).first();
+      if (!fila) return error('No hay programa con esa fecha.', 404);
       return responder(JSON.parse(fila.json));
     }
 
@@ -172,11 +211,12 @@ export async function onRequest(context) {
       if (!autor) return error('El enlace de autor no es válido o fue desactivado. Pídele uno nuevo a Camilo.', 401);
       const prep = prepararPrograma(body.datos.programa);
       if (prep.error) return error(prep.error, 400);
-      await db.prepare(`INSERT INTO programa (fecha, titulo, json, espacios, publicado_por, actualizado_en)
-        VALUES (?1, ?2, ?3, ?4, ?5, datetime('now'))
-        ON CONFLICT(fecha) DO UPDATE SET titulo = ?2, json = ?3, espacios = ?4, publicado_por = ?5, actualizado_en = datetime('now')`)
-        .bind(prep.fecha, prep.titulo, prep.json, prep.espacios, autor.nombre).run();
-      return responder({ ok: true, fecha: prep.fecha, publicado_por: autor.nombre });
+      await db.prepare(`INSERT INTO publicacion (clave, fecha, tipo, titulo, json, espacios, publicado_por, actualizado_en)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'))
+        ON CONFLICT(clave) DO UPDATE SET fecha = ?2, tipo = ?3, titulo = ?4, json = ?5,
+          espacios = ?6, publicado_por = ?7, actualizado_en = datetime('now')`)
+        .bind(prep.clave, prep.fecha, prep.tipo, prep.titulo, prep.json, prep.espacios, autor.nombre).run();
+      return responder({ ok: true, clave: prep.clave, fecha: prep.fecha, tipo: prep.tipo, publicado_por: autor.nombre });
     }
 
     /* ---- administración de autores: solo con la clave del mantenedor ---- */

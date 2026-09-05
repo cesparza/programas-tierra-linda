@@ -102,7 +102,7 @@
       <td>Un archivo de JavaScript que corre en el servidor de Cloudflare solo cuando alguien llama <code>/api/…</code>.</td>
       <td>Guardar y leer programas compartidos. Es la única pieza con llave.</td></tr>
     <tr><td><b>La base</b><br>D1 <code>programas-tl</code></td>
-      <td>Una base SQLite en mi cuenta de Cloudflare. Una fila por fecha, más la tabla de autores.</td>
+      <td>Una base SQLite en mi cuenta de Cloudflare. Una fila por <b>fecha + tipo</b> de programa, más la tabla de autores.</td>
       <td>Que el programa publicado exista en un solo lugar y no en fotos de WhatsApp.</td></tr>
   </table>
   <p><b>Qué pasa cuando un autor toca ☁️ Publicar:</b> la página manda su programa y su código al
@@ -115,7 +115,8 @@
     <li><b>Su propia copia</b>, si estaba editando en ese equipo. Por eso lo publicado nunca le pisa
       el trabajo a nadie, y por eso yo veo mi borrador mientras los demás ven lo publicado.</li>
     <li><b>El vigente de la base:</b> el sábado más próximo que aún no pasa. Puedo dejar el 5, el 12
-      y el 19 publicados y cada uno se estrena solo a medianoche del anterior.</li>
+      y el 19 publicados y cada uno se estrena solo a medianoche del anterior. Si esa fecha tiene
+      varios programas (culto y Sociedad de Jóvenes), abre el principal.</li>
     <li>El respaldo del repositorio y, en último caso, el ejemplo interno: la página nunca abre vacía.</li>
   </ol>
   <p><b>Dos hojas, un solo programa.</b> El botón 📣 Anuncios pasa a la hoja que el anciano de turno
@@ -200,6 +201,13 @@ git commit -m "Respaldo del programa del 5 de septiembre"
 git push</pre>
   <p><b>Nunca editar <code>programas/index.json</code> a mano.</b> Lo genera <code>indexar.js</code>
   leyendo la carpeta.</p>
+  <h3>Dos programas el mismo día</h3>
+  <p>La llave de guardado es <b>fecha + tipo</b>: al publicar, el autor elige si es el programa
+  principal del día o uno con nombre propio (Sociedad de Jóvenes, culto del miércoles…). Cada
+  combinación es una fila y ninguna pisa a la otra. Para borrar una:</p>
+<pre>npx wrangler d1 execute programas-tl --remote \
+  --command "DELETE FROM publicacion WHERE clave = '2026-09-05-sociedad-de-jovenes'"</pre>
+
   <h3>Si la base se daña o no responde</h3>
   <p>La página no se cae: vuelve sola al respaldo del repositorio (por eso vale mantenerlo al día).
   Diagnóstico en 10 segundos: abrir <code>/api/vigente</code> — un 404 dice "no hay nada publicado",
@@ -228,7 +236,7 @@ git push</pre>
   <p>Si el programa está mal, se corrige y se republica (caso de arriba). Si la fecha entera sobra
   (se publicó un sábado que no existe y quedó como vigente), se borra la fila directamente:</p>
 <pre>npx wrangler d1 execute programas-tl --remote \
-  --command "DELETE FROM programa WHERE fecha = '2026-09-05'"</pre>
+  --command "DELETE FROM publicacion WHERE clave = '2026-09-05'"</pre>
   <p>El vigente vuelve a ser la fecha anterior. El respaldo del repositorio no se toca.</p>
 
   <h3>Dos personas editando el mismo sábado</h3>

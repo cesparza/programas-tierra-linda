@@ -53,6 +53,7 @@ const post = (ruta, cuerpo, headers) => llamar(ruta, {
   ok('republicar la misma fecha no duplica', r.status === 200);
   r = await llamar('programas');
   ok('la lista tiene una sola entrada', r.status === 200 && r.json.length === 1 && r.json[0].publicado_por === undefined);
+  ok('cada entrada trae su clave y su tipo', r.json[0].clave === '2026-08-22' && r.json[0].tipo === '');
 
   console.log('Programas futuros (el vigente es el más próximo que no ha pasado):');
   const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -68,6 +69,25 @@ const post = (ruta, cuerpo, headers) => llamar(ruta, {
   ok('el vigente es el próximo, no el más lejano', r.status === 200 && r.json.fecha === iso(cercano), 'vigente: ' + (r.json && r.json.fecha));
   r = await llamar('programas');
   ok('la lista trae los tres', r.status === 200 && r.json.length === 3);
+
+  console.log('Dos programas el mismo día (fecha + tipo):');
+  const mismaFecha = Object.assign({}, fixture, { fecha: fechaTexto(cercano) });
+  r = await post('publicar', { token, programa: Object.assign({}, mismaFecha, { tipo: 'Sociedad de Jóvenes' }) });
+  ok('publica el segundo programa de esa fecha', r.status === 200 && r.json.clave === iso(cercano) + '-sociedad-de-jovenes', JSON.stringify(r.json));
+  r = await llamar('programa/' + iso(cercano));
+  ok('el principal sigue intacto', r.status === 200 && !r.json.tipo);
+  r = await llamar('programa/' + iso(cercano) + '-sociedad-de-jovenes');
+  ok('el segundo se lee por su propia dirección', r.status === 200 && r.json.tipo === 'Sociedad de Jóvenes');
+  r = await llamar('vigente');
+  ok('el vigente sigue siendo el principal', r.status === 200 && r.json.tipo === '' && r.json.fecha === iso(cercano), JSON.stringify(r.json && r.json.tipo));
+  r = await llamar('programas');
+  ok('la lista trae los cuatro (3 fechas + 1 tipo)', r.status === 200 && r.json.length === 4, 'trae ' + (r.json && r.json.length));
+  r = await post('publicar', { token, programa: Object.assign({}, mismaFecha, { tipo: 'Sociedad de Jóvenes', titulo: 'Jóvenes v2' }) });
+  ok('republicar el mismo tipo lo reemplaza', r.status === 200);
+  r = await llamar('programas');
+  ok('y no agrega una fila nueva', r.json.length === 4);
+  r = await post('publicar', { token, programa: Object.assign({}, mismaFecha, { tipo: '  Culto  del   miércoles  ' }) });
+  ok('el tipo se limpia de espacios y tildes en la llave', r.status === 200 && r.json.clave === iso(cercano) + '-culto-del-miercoles' && r.json.tipo === 'Culto del miércoles', JSON.stringify(r.json));
 
   console.log('Rechazos:');
   r = await post('publicar', { token, programa: Object.assign({}, fixture, { fecha: 'un día cualquiera' }) });

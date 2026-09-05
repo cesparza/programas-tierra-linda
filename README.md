@@ -35,7 +35,8 @@ base, la página funciona igual que la versión estática.
 |---|---|
 | `index.html` | La aplicación completa: HTML, CSS y JavaScript en un archivo (~60 KB). |
 | `functions/api/[[ruta]].js` | El API de publicación (~190 líneas). Ver "La base de datos y el API". |
-| `migrations/0001_inicial.sql` | Esquema de la base D1 `programas-tl`. |
+| `migrations/0001_inicial.sql` | Esquema inicial de la base D1 `programas-tl`. |
+| `migrations/0002_tipo.sql` | Una fecha puede tener varios programas: llave `fecha + tipo`. |
 | `wrangler.toml` | Binding de la base al proyecto de Pages. |
 | `manual.html` | Manual de uso para autores. Sin lenguaje técnico. |
 | `programas/AAAA-MM-DD.json` | Un archivo por programa publicado. |
@@ -45,7 +46,7 @@ base, la página funciona igual que la versión estática.
 | `tests/horas.js` | 19 casos del cálculo de duración. |
 | `tests/modelo.js` | Serialización, estados dañados y filtrado de HTML. |
 | `tests/vistas.js` | Tarjetas y hoja en cuatro pantallas, más impresión. Necesita servidor local. |
-| `tests/api.js` | 22 casos del API: publicar, autores, futuros, rechazos, revocación y límite de intentos. |
+| `tests/api.js` | 31 casos del API: publicar, autores, futuros, **dos programas el mismo día**, rechazos, revocación y límite de intentos. |
 | `tests/publicar.js` | El flujo de publicar desde la página, con navegador real. |
 | `tests/horario.js` | La corrección del horario en cascada (⤓): duraciones conservadas, filas ilegibles, deshacer. |
 | `tests/anuncios.js` | La hoja de anuncios: edición, orden, impresión por hoja, enlace y compatibilidad. |
@@ -77,17 +78,19 @@ git add -A && git commit -m "Programa del 5 de septiembre" && git push
 ## La base de datos y el API
 
 - **D1 `programas-tl`** (cuenta personal de Cloudflare), binding `DB` declarado en
-  `wrangler.toml`. Esquema en `migrations/0001_inicial.sql`: `programa` (una fila por
-  fecha, upsert), `autor` (nombre + SHA-256 del código, revocable con `activo`) e
-  `intento` (fallos de autenticación por IP).
+  `wrangler.toml`. Tablas: `publicacion` (**una fila por fecha + tipo**, upsert por
+  `clave`), `autor` (nombre + SHA-256 del código, revocable con `activo`), `intento`
+  (fallos de autenticación por IP) y `config` (hash de la clave de mantenedor).
+  `programa`, la tabla vieja de una fila por fecha, se conserva como respaldo de la
+  migración. El esquema se crea y se migra solo en el primer arranque del API.
 - **`functions/api/[[ruta]].js`** atiende `/api/*`:
 
 | Ruta | Método | Auth | Qué hace |
 |---|---|---|---|
-| `/api/vigente` | GET | pública | El programa de la fecha más próxima que no ha pasado (día de Colombia); si no hay futuros, el más reciente. Permite dejar publicados varios sábados: cada uno se estrena solo |
+| `/api/vigente` | GET | pública | El programa de la fecha más próxima que no ha pasado (día de Colombia); si no hay futuros, el más reciente. Si esa fecha tiene varios, el principal (`tipo` vacío). Permite dejar publicados varios sábados: cada uno se estrena solo |
 | `/api/programas` | GET | pública | Lista de fechas publicadas |
-| `/api/programa/AAAA-MM-DD` | GET | pública | Un programa puntual |
-| `/api/publicar` | POST | código de autor | Guarda/actualiza el programa de su fecha |
+| `/api/programa/AAAA-MM-DD[-tipo]` | GET | pública | Un programa puntual; el sufijo distingue los del mismo día |
+| `/api/publicar` | POST | código de autor | Guarda/actualiza el programa de esa fecha **y ese tipo** |
 | `/api/autores` | GET/POST | clave de mantenedor | Lista / crea autores (el código se muestra una sola vez) |
 | `/api/autores/estado` | POST | clave de mantenedor | Activa o desactiva un autor |
 
@@ -153,6 +156,8 @@ Es el mismo objeto en los tres lugares: el JSON publicado, el `localStorage` y e
       ]
     }
   ],
+  "tipo": "",                         // "" = programa principal del día;
+                                      // "Sociedad de Jóvenes", "Culto del miércoles"…
   "anunciosTitulo": "Anuncios",       // encabezado de la hoja de anuncios
   "anuncios": [                       // lo que el anciano de turno lee en voz alta
     { "tit": "Semana de evangelismo", "det": "Del 13 al 18, 7:00 pm, por Zoom" }
